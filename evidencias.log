@@ -1,0 +1,14 @@
+Script iniciado em 2026-08-17 18:32:27-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/0" COLUMNS="177" LINES="80"]
+[?2004h$ date
+[?2004lseg 17 ago 2026 18:32:29 -03
+[?2004h$ whoami
+[?2004leuclides
+[?2004h$ gcc 
+evidencias.log  .git/           objects/        README.md       source/         teste.o         
+$ gcc evidencias.log [K[K[K[K[K[K[K[K[K[K[K[K[K[K[Ksource/process_flow.c -o teste.o
+[?2004l[?2004h$ ./teste.o 
+[?2004lIniciando modo interativo...[?2004h$ ./teste.o teste.txt
+[?2004lLendo o arquivo: teste.txt[?2004h$ [?2004l
+exit
+
+Script concluído em 2026-08-17 18:33:17-03:00 [COMMAND_EXIT_CODE="0"]
