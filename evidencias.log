@@ -12,3 +12,29 @@ $ gcc evidencias.log [K[K[K[K[K[K[K[K[K[K[K[K[K[K
 exit
 
 Script concluído em 2026-08-17 18:33:17-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-19 20:31:43-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/1" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ ./processfol[K[Klow
+[?2004lprocessflow> teste     run teste
+run teste 
+processflow> teste teste
+teste teste 
+processflow> teste 	 ^[
+teste 
+processflow> tesrt     ta
+ta 
+processflow> saida dupla  
+saida dupla 
+processflow> Intel N100          | ta
+processflow> saida dupla
+saida duplta 
+processflow> processflow> saida dupla 
+processflow> r agora
+saida duplagora 
+processflow> bug
+bug 
+processflow> feio
+feio 
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-19 20:32:51-03:00 [COMMAND_EXIT_CODE="0"]
