@@ -8,10 +8,25 @@
 
 bool running = true;
 
+static void descartar_resto(FILE *arquivo) {
+    int c;
+    do {
+        c = fgetc(arquivo);
+    } while (c != '\n' && c != EOF);
+}
+
+static bool coube(char *buffer) {
+    char *quebra = strchr(buffer, '\n');
+    if (quebra == NULL) {
+        return false;
+    }
+    return true;
+}
+
 void leitura(FILE *arquivo, int modo){
     char buffer[300];
     char *palavras[MAX_PALAVRAS];
-    
+
     while (running) {
         if (modo == 1){
             printf("processflow> ");
@@ -20,6 +35,12 @@ void leitura(FILE *arquivo, int modo){
         char *result = fgets(buffer, 300, arquivo);
         if (result == NULL) {
             break;
+        }
+
+        if (!coube(buffer) && !feof(arquivo)) {
+            descartar_resto(arquivo);
+            fprintf(stderr, "Erro: linha longa demais, ignorada.\n");
+            continue;
         }
 
         if (modo == 0){
@@ -32,7 +53,7 @@ void leitura(FILE *arquivo, int modo){
             printf("%s ", palavras[i]);
         }
         printf("\n");
-        
+
         if (palavras[0] != NULL) {
             if (strcmp(palavras[0], "exit") == 0) {
                 running = false;
@@ -59,4 +80,3 @@ int main (int argc, char *argv[]){
         return 1;
     }
 }
-

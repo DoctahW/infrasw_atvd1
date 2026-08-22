@@ -344,3 +344,71 @@ make: *** [Makefile:32: test] Error 1
 exit
 
 Script concluído em 2026-08-22 12:53:50-03:00 [COMMAND_EXIT_CODE="2"]
+Script iniciado em 2026-08-22 13:03:50-03:00 [COMMAND="bash --noprofile --rcfile tests/logrc -i" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="111" LINES="10"]
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make test
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/parser.o objects/process_flow.o objects/tasks.o
+
+=== PARSER ===
+[01] conta as palavras no retorno                         ok
+[02] tokens corretos                                      ok
+[03] multiplos espacos e tabs                             ok
+[04] linha vazia                                          ok
+[05] respeita o limite quant (nao escreve fora)           ok
+[06] quant = 0 nao escreve nada                           ok
+
+=== TASKS ===
+[07] cadastro simples + busca                             ok
+[08] busca de nome inexistente devolve NULL               ok
+[09] ACEITACAO F2: sobrevive a reescrita do buffer        ok
+[10] recusa nome duplicado                                ok
+[11] recusa quando a tabela enche                         ok
+[12] recusa argc > MAX_ARGS                               ok
+[13] aceita exatamente MAX_ARGS                           ok
+[14] recusa argc negativo                                 ok
+[15] recusa nome longo demais                             ok
+[16] recusa argumento longo demais                        ok
+[17] cadastro que falha nao suja a tabela                 ok
+[18] nao estoura com nome NULL                            ok
+
+----------------------------------------
+18 testes, 0 falha(s)
+
+
+=== MODO INTERATIVO ===
+  ok     sai com 'exit' sem travar (rc=0)
+  ok     mostra o prompt processflow>
+  ok     CTRL-D (EOF) sem 'exit' encerra limpo (rc=0)
+  ok     linha vazia nao quebra (rc=0)
+  ok     multiplos espacos nao quebram (rc=0)
+
+=== MODO WORKFLOW ===
+  ok     roda arquivo .pf e sai (rc=0)
+  ok     imprime a linha lida antes de processar
+  ok     NAO mostra prompt no modo workflow
+  ok     arquivo .pf sem 'exit' encerra no EOF (rc=0)
+
+=== ERROS DE INICIALIZACAO ===
+  ok     arquivo inexistente encerra com codigo != 0 (rc=1)
+  ok     arquivo inexistente imprime mensagem
+  ok     argumentos demais encerra com codigo != 0 (rc=1)
+  ok     argumentos demais imprime mensagem
+
+=== COMANDOS DA ESPECIFICACAO ===
+  FALHA  comando 'run' de tarefa cadastrada faz algo (ou erro coerente)
+  FALHA  'run' de tarefa inexistente imprime erro
+  FALHA  comando desconhecido imprime erro
+
+=== ROBUSTEZ ===
+  ok     linha > 299 chars nao vira dois comandos (prompt apareceu 2x, esperado 2)
+
+----------------------------------------
+17 testes, 3 falha(s)
+
+*** ha testes falhando ***
+make: *** [Makefile:32: test] Error 1
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ ^C[?2004l[?2004h[?2004l
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [?2004l
+exit
+
+Script concluído em 2026-08-22 13:05:06-03:00 [COMMAND_EXIT_CODE="130"]
