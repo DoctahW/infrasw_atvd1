@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parser.h"
+#include "tasks.h"
 
 #define MAX_PALAVRAS 64
 
@@ -21,6 +22,89 @@ static bool coube(char *buffer) {
         return false;
     }
     return true;
+}
+
+static char *mensagem_status(StatusTarefa status) {
+    switch (status) {
+        case TASK_OK:               return "sem erro";
+        case TASK_E_TABELA_CHEIA:   return "a tabela de tarefas esta cheia";
+        case TASK_E_NOME_DUPLICADO: return "ja existe uma tarefa com esse nome";
+        case TASK_E_CAMPO_LONGO:    return "nome, programa ou argumento longo demais";
+        case TASK_E_ARGS_DEMAIS:    return "argumentos demais para uma tarefa";
+    }
+    return "motivo desconhecido";
+}
+
+static void tratar_task(char **palavras, int n) {
+    if (n < 3) {
+        fprintf(stderr, "Erro: uso: task <nome> <programa> [argumentos...]\n");
+        return;
+    }
+
+    StatusTarefa status = cadastrar_tarefa(palavras[1], palavras[2],
+                                           &palavras[3], n - 3);
+    if (status != TASK_OK) {
+        fprintf(stderr, "Erro: tarefa '%s' nao cadastrada: %s.\n",
+                palavras[1], mensagem_status(status));
+    }
+}
+
+static void tratar_run(char **palavras, int n) {
+    if (n < 2) {
+        fprintf(stderr, "Erro: uso: run <tarefa> | run sequential | parallel | pipe <tarefas...>\n");
+        return;
+    }
+
+    if (strcmp(palavras[1], "sequential") == 0) {
+        fprintf(stderr, "Erro: 'run sequential' ainda nao implementado (Fase 4).\n");
+        return;
+    }
+    if (strcmp(palavras[1], "parallel") == 0) {
+        fprintf(stderr, "Erro: 'run parallel' ainda nao implementado (Fase 4).\n");
+        return;
+    }
+    if (strcmp(palavras[1], "pipe") == 0) {
+        fprintf(stderr, "Erro: 'run pipe' ainda nao implementado (Fase 6).\n");
+        return;
+    }
+
+    if (buscar_tarefa(palavras[1]) == NULL) {
+        fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[1]);
+        return;
+    }
+    fprintf(stderr, "Erro: 'run' ainda nao executa a tarefa (Fase 3).\n");
+}
+
+static void tratar_exit(char **palavras, int n) {
+    (void)palavras;
+    (void)n;
+    running = false;
+}
+
+typedef struct {
+    char *nome;
+    void (*tratador)(char **palavras, int n);
+} Comando;
+
+static const Comando comandos[] = {
+    { "task", tratar_task },
+    { "run",  tratar_run  },
+    { "exit", tratar_exit },
+};
+
+static void despachar(char **palavras, int n) {
+    if (n == 0) {
+        return;
+    }
+
+    for (size_t i = 0; i < sizeof comandos / sizeof comandos[0]; i++) {
+        if (strcmp(palavras[0], comandos[i].nome) == 0) {
+            comandos[i].tratador(palavras, n);
+            return;
+        }
+    }
+    
+    fprintf(stderr, "Erro: comando desconhecido: '%s'.\n", palavras[0]);
 }
 
 void leitura(FILE *arquivo, int modo){
@@ -45,20 +129,11 @@ void leitura(FILE *arquivo, int modo){
 
         if (modo == 0){
             printf("%s", buffer);
+            fflush(stdout);
         }
 
-        dividir_palavras(buffer, palavras, MAX_PALAVRAS);
-
-        for (int i = 0; palavras[i] != NULL; i++) {
-            printf("%s ", palavras[i]);
-        }
-        printf("\n");
-
-        if (palavras[0] != NULL) {
-            if (strcmp(palavras[0], "exit") == 0) {
-                running = false;
-            }
-        }
+        int n = dividir_palavras(buffer, palavras, MAX_PALAVRAS);
+        despachar(palavras, n);
     }
 }
 
@@ -69,14 +144,14 @@ int main (int argc, char *argv[]){
     if (argc == 2) {
         FILE *arquivo = fopen(argv[1], "r");
         if (arquivo == NULL) {
-            printf("Erro: arquivo não encontrado.\n");
+            fprintf(stderr, "Erro: arquivo não encontrado.\n");
             return 1;
         }
         leitura(arquivo, 0);
         fclose(arquivo);
     }
     if (argc > 2) {
-        printf("Erro: número de argumentos inválido.\n");
+        fprintf(stderr, "Erro: número de argumentos inválido.\n");
         return 1;
     }
 }
