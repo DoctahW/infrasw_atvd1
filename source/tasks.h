@@ -5,7 +5,7 @@
 #define MAX_N_LEN  64
 #define MAX_P_LEN  256
 #define MAX_ARGS      16
-#define MAX_ARG_LEN   64
+#define MAX_ARG_LEN   256
 
 typedef struct {
     char name[MAX_N_LEN];
