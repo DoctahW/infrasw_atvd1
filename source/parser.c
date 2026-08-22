@@ -1,14 +1,20 @@
 #include <string.h>
+#include "parser.h"
 
-void dividir_palavras(char *linha, char **palavras, int quant) {
+int dividir_palavras(char *linha, char **palavras, int quant) {
+    if (quant <= 0) {
+        return 0;
+    }
     char *saveptr;
-    char *token;
+    char *token = strtok_r(linha, " \t\n", &saveptr);
+    int n = 0;
 
-    token = strtok_r(linha, " \t\n", &saveptr);
-    while (token != NULL && quant > 1) {
-        *palavras++ = token;
-        quant--;
+    while (token != NULL && n < quant - 1) {
+        palavras[n] = token;
+        n++;
         token = strtok_r(NULL, " \t\n", &saveptr);
     }
-    *palavras = NULL;
+
+    palavras[n] = NULL;
+    return n;
 }
