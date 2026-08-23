@@ -29,3 +29,10 @@ pid_t create_process(Tarefa *tarefa) {
 pid_t wait_process(pid_t pid) {
     return waitpid(pid, NULL, 0);
 }
+
+void executar_sequencial(Tarefa *tarefas[], int total) {
+    for (int i=0; i < total; i++) {
+        pid_t pid = create_process(tarefas[i]);
+        wait_process(pid);
+    }
+}

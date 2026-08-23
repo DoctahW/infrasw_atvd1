@@ -57,7 +57,28 @@ static void tratar_run(char **palavras, int n) {
     }
 
     if (strcmp(palavras[1], "sequential") == 0) {
-        fprintf(stderr, "Erro: 'run sequential' ainda nao implementado (Fase 4).\n");
+        if (n < 4) {
+            fprintf(stderr, "Erro: uso: run sequential <tarefa1> <tarefa2> ...\n");
+            return;
+        }
+        
+        Tarefa *tarefas[n - 2];
+        int qtd = 0;
+        
+        for (int i = 2; i < n; i++) {
+            if (buscar_tarefa(palavras[i]) == NULL) {
+                fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[i]);
+                continue;
+            }
+            Tarefa *tarefa = buscar_tarefa(palavras[i]);
+            tarefas[qtd++] = tarefa;
+        }
+
+        if (qtd == 0) {
+            fprintf(stderr, "Erro: Nenhuma tarefa existe.\n");
+            return;
+        }
+        executar_sequencial(tarefas, qtd);
         return;
     }
     if (strcmp(palavras[1], "parallel") == 0) {
