@@ -6,5 +6,6 @@
 pid_t create_process(Tarefa *tarefa);
 pid_t wait_process(pid_t pid);
 void executar_sequencial(Tarefa *tarefas[], int total);
+void executar_paralelo(Tarefa *tarefas[], int total);
 
 #endif

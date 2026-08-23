@@ -36,3 +36,14 @@ void executar_sequencial(Tarefa *tarefas[], int total) {
         wait_process(pid);
     }
 }
+
+void executar_paralelo(Tarefa *tarefas[], int total) {
+    pid_t pids[total];
+    for (int i=0; i < total; i++) {
+        pid_t pid = create_process(tarefas[i]);
+        pids[i] = pid;
+    }
+    for (int i=0; i < total; i++) {
+        wait_process(pids[i]);
+    }
+}

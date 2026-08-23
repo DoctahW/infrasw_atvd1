@@ -50,6 +50,19 @@ static void tratar_task(char **palavras, int n) {
     }
 }
 
+static int resolver_tarefas(char **palavras, int n, Tarefa *destino[]) {
+    int qtd = 0;
+    for (int i = 0; i < n; i++) {
+        Tarefa *tarefa = buscar_tarefa(palavras[i]);
+        if (tarefa == NULL) {
+            fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[i]);
+            continue;
+        }
+        destino[qtd++] = tarefa;
+    }
+    return qtd;
+}
+
 static void tratar_run(char **palavras, int n) {
     if (n < 2) {
         fprintf(stderr, "Erro: uso: run <tarefa> | run sequential | parallel | pipe <tarefas...>\n");
@@ -63,16 +76,7 @@ static void tratar_run(char **palavras, int n) {
         }
         
         Tarefa *tarefas[n - 2];
-        int qtd = 0;
-        
-        for (int i = 2; i < n; i++) {
-            if (buscar_tarefa(palavras[i]) == NULL) {
-                fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[i]);
-                continue;
-            }
-            Tarefa *tarefa = buscar_tarefa(palavras[i]);
-            tarefas[qtd++] = tarefa;
-        }
+        int qtd = resolver_tarefas(palavras + 2, n - 2, tarefas);
 
         if (qtd == 0) {
             fprintf(stderr, "Erro: Nenhuma tarefa existe.\n");
@@ -82,7 +86,18 @@ static void tratar_run(char **palavras, int n) {
         return;
     }
     if (strcmp(palavras[1], "parallel") == 0) {
-        fprintf(stderr, "Erro: 'run parallel' ainda nao implementado (Fase 4).\n");
+        if (n < 4) {
+            fprintf(stderr, "Erro: uso: run parallel <tarefa1> <tarefa2> ...\n");
+            return;
+        }
+        
+        Tarefa *tarefas[n - 2];
+        int qtd = resolver_tarefas(palavras + 2, n - 2, tarefas);
+        if (qtd == 0) {
+            fprintf(stderr, "Erro: Nenhuma tarefa existe.\n");
+            return;
+        }
+        executar_paralelo(tarefas, qtd);
         return;
     }
     if (strcmp(palavras[1], "pipe") == 0) {
