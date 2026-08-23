@@ -1,0 +1,5 @@
+task dorme3 /bin/sleep 3
+task dorme1 /bin/sleep 1
+task dorme2 /bin/sleep 2
+run parallel dorme3 dorme1 dorme2
+exit
