@@ -1,20 +1,27 @@
 Script iniciado em 2026-08-17 18:32:27-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/0" COLUMNS="177" LINES="80"]
 [?2004h$ date
-[?2004lseg 17 ago 2026 18:32:29 -03
+[?2004l
+seg 17 ago 2026 18:32:29 -03
 [?2004h$ whoami
-[?2004leuclides
+[?2004l
+euclides
 [?2004h$ gcc 
 evidencias.log  .git/           objects/        README.md       source/         teste.o         
 $ gcc evidencias.log [K[K[K[K[K[K[K[K[K[K[K[K[K[K[Ksource/process_flow.c -o teste.o
-[?2004l[?2004h$ ./teste.o 
-[?2004lIniciando modo interativo...[?2004h$ ./teste.o teste.txt
-[?2004lLendo o arquivo: teste.txt[?2004h$ [?2004l
+[?2004l
+[?2004h$ ./teste.o 
+[?2004l
+Iniciando modo interativo...[?2004h$ ./teste.o teste.txt
+[?2004l
+Lendo o arquivo: teste.txt[?2004h$ [?2004l
+
 exit
 
 Script concluído em 2026-08-17 18:33:17-03:00 [COMMAND_EXIT_CODE="0"]
 Script started on 2026-08-19 20:31:43-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/1" COLUMNS="91" LINES="40"]
 [?2004hbash-5.3$ ./processfol[K[Klow
-[?2004lprocessflow> teste     run teste
+[?2004l
+processflow> teste     run teste
 run teste 
 processflow> teste teste
 teste teste 
@@ -34,16 +41,19 @@ processflow> bug
 bug 
 processflow> feio
 feio 
-processflow> [?2004hbash-5.3$ [?2004l
+processflow> [?2004hbash-5.3$ [?2004l
+
 exit
 
 Script done on 2026-08-19 20:32:51-03:00 [COMMAND_EXIT_CODE="0"]
 Script iniciado em 2026-08-22 12:37:53-03:00 [COMMAND="bash --noprofile --rcfile tests/logrc -i" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="111" LINES="14"]
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make clean
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make teste[K
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -81,10 +91,12 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make clena[K[Kan
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make test
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -122,10 +134,12 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make clean
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make ter[Kst
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -163,10 +177,12 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make testclean
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make clean[1Ptest
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -202,11 +218,21 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 /bin/sh: linha 2: ./tests/run_tests.sh: Arquivo ou diretório inexistente
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
-]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [K[euclides@pc-casa infrasw_atvd1]$ [K[euclides@pc-casa infrasw_atvd1]$ [K[euclides@pc-casa infrasw_atvd1]$ [K[euclides@pc-casa infrasw_atvd1]$ makje[K[Ke clean
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ 
+[K
+[euclides@pc-casa infrasw_atvd1]$ 
+[K
+[euclides@pc-casa infrasw_atvd1]$ 
+[K
+[euclides@pc-casa infrasw_atvd1]$ 
+[K
+[euclides@pc-casa infrasw_atvd1]$ makje[K[Ke clean
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make test
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -242,10 +268,12 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make clean
-[?2004lrm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
+[?2004l
+rm -f processflow test_tasks objects/parser.o objects/process_flow.o objects/tasks.o objects/parser.d objects/process_flow.d objects/tasks.d
 rm -rf objects
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ mea[K[Kake test
-[?2004lmkdir -p objects
+[?2004l
+mkdir -p objects
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
@@ -281,7 +309,8 @@ gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c object
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make test
-[?2004l
+[?2004l
+
 === PARSER ===
 [01] conta as palavras no retorno                         ok
 [02] tokens corretos                                      ok
@@ -340,13 +369,15 @@ make: *** [Makefile:32: test] Error 1
 
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
-]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [?2004l
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [?2004l
+
 exit
 
 Script concluído em 2026-08-22 12:53:50-03:00 [COMMAND_EXIT_CODE="2"]
 Script iniciado em 2026-08-22 13:03:50-03:00 [COMMAND="bash --noprofile --rcfile tests/logrc -i" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="111" LINES="10"]
 ]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ make test
-[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+[?2004l
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
 gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/parser.o objects/process_flow.o objects/tasks.o
 
 === PARSER ===
@@ -407,8 +438,220 @@ gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/parser.o objects/process_
 
 *** ha testes falhando ***
 make: *** [Makefile:32: test] Error 1
-]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ ^C[?2004l[?2004h[?2004l
-]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [?2004l
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ ^C[?2004l
+[?2004h[?2004l
+
+]0;euclides@pc-casa:~/Projetos/infrasw/infrasw_atvd1[?2004h[euclides@pc-casa infrasw_atvd1]$ [?2004l
+
 exit
 
 Script concluído em 2026-08-22 13:05:06-03:00 [COMMAND_EXIT_CODE="130"]
+Script started on 2026-08-22 22:08:07-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/5" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ makel[K
+[?2004l
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+[01m[Ksource/executor.c:[m[K In function ‘[01m[Kwait_process[m[K’:
+[01m[Ksource/executor.c:30:25:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kpid[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc-16.1.0/gcc/Warning-Options.html#index-Wno-unused-parameter-Wunused-parameter]8;;[m[K]
+   30 | void wait_process([01;35m[Kpid_t pid[m[K) {
+      |                   [01;35m[K~~~~~~^~~[m[K
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make
+[?2004l
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ ./processflow
+[?2004l
+processflow> task listar bin/    /bin/ls -l
+processflow> run listar
+Erro: 'run' ainda nao executa a tarefa (Fase 3).
+processflow> [?2004hbash-5.3$ make
+[?2004l
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make./processflow
+[?2004l
+processflow> ^[[A^[[A^[[A            tak sk listar /bin/ls/  -l
+processflow> run listar
+processflow> evidencias.log	objects   processflow  source	  tests
+Makefile	README.md    teste.txt  test_tasks
+^C
+[?2004hbash-5.3$ [?2004l
+
+exit
+
+Script done on 2026-08-22 22:13:42-03:00 [COMMAND_EXIT_CODE="130"]
+Script started on 2026-08-22 22:37:47-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/6" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ .[Kmake
+[?2004lmake: Nothing to be done for 'all'.
+[?2004hbash-5.3$ make clean
+[?2004lrm -f processflow test_tasks objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o objects/executor.d objects/parser.d objects/process_flow.d objects/tasks.d
+rm -rf objects
+[?2004hbash-5.3$ make
+[?2004lmkdir -p objects
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ .//[Kprocessflow
+[?2004lprocessflow> make r lista          task listar /bib n/ls -l
+processflow> run listar
+total 100
+-rw-r--r-- 1 euclides euclides 23072 Aug 22 22:14 evidencias.log
+-rw-r--r-- 1 euclides euclides  1014 Aug 22 13:08 Makefile
+drwxr-xr-x 1 euclides euclides   156 Aug 22 22:37 objects
+-rw-r--r-- 1 euclides euclides 34044 Aug 22 20:50 PLANO.md
+-rwxr-xr-x 1 euclides euclides 26808 Aug 22 22:37 processflow
+-rw-r--r-- 1 euclides euclides    15 Aug 17 09:42 README.md
+drwxr-xr-x 1 euclides euclides   128 Aug 22 22:10 source
+-rw-r--r-- 1 euclides euclides     5 Aug 19 09:38 teste.txt
+drwxr-xr-x 1 euclides euclides    48 Aug 22 13:08 tests
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-22 22:38:33-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-22 23:03:47-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/6" COLUMNS="44" LINES="40"]
+[?2004hbash-5.3$ make clean
+[?2004lrm -f processflow test_tasks objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o objects/executor.d objects/parser.d objects/process_flow.d objects/tasks.d
+rm -rf objects
+[?2004hbash-5.3$ make test-fase4
+[?2004lmkdir -p objects
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+./tests/test_fase4.sh
+
+=== FASE 4: SEQUENCIAL (esperado ~6000ms) ===
+  medido: 6023ms
+  ok     sequencial espera cada tarefa (3+1+2 = ~6s)
+
+=== FASE 4: PARALELO (esperado ~3000ms) ===
+  medido: 8ms
+  FALHA  paralelo roda as tres juntas (max(3,1,2) = ~3s)
+  ok     paralelo e mais rapido que sequencial (8ms < 6023ms)
+
+=== LISTA COM TAREFA INEXISTENTE ===
+  medido: 2015ms
+  ok     avisa que a tarefa inexistente nao existe
+  ok     pula a inexistente e roda as outras duas (~2s, nao aborta a lista)
+
+=== VALIDACAO DE ARGUMENTOS ===
+  ok     'run sequential' sem nenhum nome imprime erro
+  ok     'run sequential' com UM nome so imprime erro (enunciado: mais de uma)
+  ok     'run parallel' sem nenhum nome imprime erro
+
+=== NAO ENCERRA A SESSAO ===
+  ok     lista toda inexistente nao derruba o processflow
+
+----------------------------------------
+9 testes, 1 falha(s)
+
+make: *** [Makefile:45: test-fase4] Error 1
+[?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-22 23:04:45-03:00 [COMMAND_EXIT_CODE="2"]
+Script started on 2026-08-22 23:20:42-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/5" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ make clea[K[K[K[K[K
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make test
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c objects/executor.o objects/parser.o objects/tasks.o
+
+=== PARSER ===
+[01] conta as palavras no retorno                         ok
+[02] tokens corretos                                      ok
+[03] multiplos espacos e tabs                             ok
+[04] linha vazia                                          ok
+[05] respeita o limite quant (nao escreve fora)           ok
+[06] quant = 0 nao escreve nada                           ok
+
+=== TASKS ===
+[07] cadastro simples + busca                             ok
+[08] busca de nome inexistente devolve NULL               ok
+[09] ACEITACAO F2: sobrevive a reescrita do buffer        ok
+[10] recusa nome duplicado                                ok
+[11] recusa quando a tabela enche                         ok
+[12] recusa argc > MAX_ARGS                               ok
+[13] aceita exatamente MAX_ARGS                           ok
+[14] recusa argc negativo                                 ok
+[15] recusa nome longo demais                             ok
+[16] recusa argumento longo demais                        ok
+[17] cadastro que falha nao suja a tabela                 ok
+[18] nao estoura com nome NULL                            ok
+
+----------------------------------------
+18 testes, 0 falha(s)
+
+
+=== MODO INTERATIVO ===
+  ok     sai com 'exit' sem travar (rc=0)
+  ok     mostra o prompt processflow>
+  ok     CTRL-D (EOF) sem 'exit' encerra limpo (rc=0)
+  ok     linha vazia nao quebra (rc=0)
+  ok     multiplos espacos nao quebram (rc=0)
+
+=== MODO WORKFLOW ===
+  ok     roda arquivo .pf e sai (rc=0)
+  ok     imprime a linha lida antes de processar
+  ok     NAO mostra prompt no modo workflow
+  ok     arquivo .pf sem 'exit' encerra no EOF (rc=0)
+
+=== ERROS DE INICIALIZACAO ===
+  ok     arquivo inexistente encerra com codigo != 0 (rc=1)
+  ok     arquivo inexistente imprime mensagem
+  ok     argumentos demais encerra com codigo != 0 (rc=1)
+  ok     argumentos demais imprime mensagem
+
+=== COMANDOS DA ESPECIFICACAO ===
+  ok     run executa e entrega TODOS os argumentos (pega off-by-one no argv)
+  ok     run passa a opcao -l (linhas com bits de permissao)
+  ok     run espera o filho terminar (levou 1012ms, esperado >=900)
+  ok     exec que falha imprime mensagem de erro
+  ok     exec que falha NAO cria um segundo processflow (msg 1x, esperado 1)
+  ok     exec que falha NAO encerra o processflow (comando seguinte roda)
+  ok     'run' de tarefa inexistente imprime erro
+  ok     comando desconhecido imprime erro
+
+=== ROBUSTEZ ===
+  ok     linha > 299 chars nao vira dois comandos (prompt apareceu 2x, esperado 2)
+
+----------------------------------------
+22 testes, 0 falha(s)
+
+[?2004hbash-5.3$ make test-fase4
+[?2004l./tests/test_fase4.sh
+
+=== FASE 4: SEQUENCIAL (esperado ~6000ms) ===
+  medido: 6018ms
+  ok     sequencial espera cada tarefa (3+1+2 = ~6s)
+
+=== FASE 4: PARALELO (esperado ~3000ms) ===
+  medido: 3011ms
+  ok     paralelo roda as tres juntas (max(3,1,2) = ~3s)
+  ok     paralelo e mais rapido que sequencial (3011ms < 6018ms)
+
+=== LISTA COM TAREFA INEXISTENTE ===
+  medido: 2017ms
+  ok     avisa que a tarefa inexistente nao existe
+  ok     pula a inexistente e roda as outras duas (~2s, nao aborta a lista)
+
+=== VALIDACAO DE ARGUMENTOS ===
+  ok     'run sequential' sem nenhum nome imprime erro
+  ok     'run sequential' com UM nome so imprime erro (enunciado: mais de uma)
+  ok     'run parallel' sem nenhum nome imprime erro
+
+=== NAO ENCERRA A SESSAO ===
+  ok     lista toda inexistente nao derruba o processflow
+
+----------------------------------------
+9 testes, 0 falha(s)
+
+[?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-22 23:21:24-03:00 [COMMAND_EXIT_CODE="0"]
