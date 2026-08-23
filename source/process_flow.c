@@ -109,8 +109,12 @@ static void tratar_run(char **palavras, int n) {
         fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[1]);
         return;
     }
-    pid_t pid = create_process(buscar_tarefa(palavras[1]));
-    wait_process(pid);
+    Tarefa *tarefa = buscar_tarefa(palavras[1]);
+    pid_t pid = create_process(tarefa);
+    int status;
+    if (wait_process(pid, &status) > 0) {
+        reportar_status(tarefa, status);
+    }
 }
 
 static void tratar_exit(char **palavras, int n) {
