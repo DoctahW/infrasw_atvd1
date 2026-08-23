@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include "tasks.h"
 
+int redirecionar(char *arquivo, int flags, int alvo);
 pid_t create_process(Tarefa *tarefa);
 pid_t wait_process(pid_t pid, int *out_status);
 void reportar_status(const Tarefa *t, int status);

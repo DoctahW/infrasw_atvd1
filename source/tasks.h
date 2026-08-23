@@ -12,6 +12,9 @@ typedef struct {
     char programa[MAX_P_LEN];
     char args[MAX_ARGS][MAX_ARG_LEN];
     int  argc;
+    char entrada[MAX_P_LEN];
+    char saida[MAX_P_LEN];
+    int anexo;
 } Tarefa;
 
 typedef enum {
@@ -19,11 +22,14 @@ typedef enum {
     TASK_E_TABELA_CHEIA,
     TASK_E_NOME_DUPLICADO,
     TASK_E_CAMPO_LONGO,
-    TASK_E_ARGS_DEMAIS
+    TASK_E_ARGS_DEMAIS,
+    TASK_E_NAO_ENCONTRADA
 } StatusTarefa;
 
 StatusTarefa cadastrar_tarefa(char *nome, char *programa,
                            char *args[], int argc);
+StatusTarefa definir_entrada(char *nome, char *arquivo);
+StatusTarefa definir_saida(char *nome, char *arquivo, int anexo);
 Tarefa *buscar_tarefa(char *nome);
 
 #endif

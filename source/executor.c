@@ -1,9 +1,24 @@
 #include "tasks.h"
+#include <string.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <fcntl.h>
+
+static int redirecionar(char *arquivo, int flags, int alvo) {
+    int aberto = open(arquivo, flags, 0644);
+    if (aberto < 0)
+        return -1;
+    if (dup2(aberto, alvo) < 0) {
+        close(aberto);
+        return -1;
+    }
+    if (aberto != alvo)
+        close(aberto);
+    return 0;
+}
 
 pid_t create_process(Tarefa *tarefa) {
     pid_t pid;
@@ -20,8 +35,24 @@ pid_t create_process(Tarefa *tarefa) {
     }
     
     if (pid == 0) {
+        if (tarefa->entrada[0] != '\0') {
+            if (redirecionar(tarefa->entrada, O_RDONLY, STDIN_FILENO) < 0) {
+                fprintf(stderr, "processflow: %s: %s\n", tarefa->entrada, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
+        if (tarefa->saida[0] != '\0') {
+            int modo = tarefa->anexo ? O_APPEND : O_TRUNC;
+            int flags = O_WRONLY | O_CREAT | modo;
+            
+            if (redirecionar(tarefa->saida, flags, STDOUT_FILENO) < 0) {
+                fprintf(stderr, "processflow: %s: %s\n", tarefa->saida, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
+
         execv(tarefa->programa, args);
-        perror("execv");
+        fprintf(stderr, "processflow: %s: %s\n", tarefa->programa, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return pid;
@@ -81,5 +112,4 @@ void executar_paralelo(Tarefa *tarefas[], int total) {
         }
     }
 }
-
 

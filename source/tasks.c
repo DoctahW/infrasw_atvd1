@@ -46,6 +46,32 @@ StatusTarefa cadastrar_tarefa(char *nome, char *programa,
     return TASK_OK;
 }
 
+StatusTarefa definir_entrada(char *nome, char *arquivo) {
+    Tarefa *t = buscar_tarefa(nome);
+    if (t == NULL) {
+        return TASK_E_NAO_ENCONTRADA; 
+    }
+    
+    if (!copiar(t->entrada, sizeof t->entrada, arquivo)) {
+        return TASK_E_CAMPO_LONGO;
+    }
+    
+    return TASK_OK;
+}
+
+
+StatusTarefa definir_saida(char *nome, char *arquivo, int anexo) {
+    Tarefa *t = buscar_tarefa(nome);
+    if (t == NULL) {
+        return TASK_E_NAO_ENCONTRADA;
+    }
+    if (!copiar(t->saida, sizeof t->saida, arquivo)) {
+        return TASK_E_CAMPO_LONGO;
+    }
+    t->anexo = anexo;
+    return TASK_OK;
+}
+
 Tarefa *buscar_tarefa(char *nome) {
     for (int i = 0; i < total; i++) {
         if (strcmp(tabela[i].name, nome) == 0) {

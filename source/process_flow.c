@@ -32,6 +32,7 @@ static char *mensagem_status(StatusTarefa status) {
         case TASK_E_NOME_DUPLICADO: return "ja existe uma tarefa com esse nome";
         case TASK_E_CAMPO_LONGO:    return "nome, programa ou argumento longo demais";
         case TASK_E_ARGS_DEMAIS:    return "argumentos demais para uma tarefa";
+        case TASK_E_NAO_ENCONTRADA: return "Tarefa nao encontrada";
     }
     return "motivo desconhecido";
 }
@@ -47,6 +48,42 @@ static void tratar_task(char **palavras, int n) {
     if (status != TASK_OK) {
         fprintf(stderr, "Erro: tarefa '%s' nao cadastrada: %s.\n",
                 palavras[1], mensagem_status(status));
+    }
+}
+
+static void tratar_input(char **palavras, int n) {
+    if (n != 3) {
+        fprintf(stderr, "Erro: uso: input <tarefa> <arquivo>\n");
+        return;
+    }
+    
+    StatusTarefa status = definir_entrada(palavras[1], palavras[2]);
+    if (status != TASK_OK) {
+        fprintf(stderr, "Erro: entrada nao definida: %s.\n", mensagem_status(status));
+    }
+}
+
+static void tratar_output(char **palavras, int n) {
+    if (n != 3) {
+        fprintf(stderr, "Erro: uso: output <tarefa> <arquivo>\n");
+        return;
+    }
+    
+    StatusTarefa status = definir_saida(palavras[1], palavras[2], 0);
+    if (status != TASK_OK) {
+        fprintf(stderr, "Erro: saida nao definida: %s.\n", mensagem_status(status));
+    }
+}
+
+static void tratar_append(char **palavras, int n) {
+    if (n != 3) {
+        fprintf(stderr, "Erro: uso: append <tarefa> <arquivo>\n");
+        return;
+    }
+    
+    StatusTarefa status = definir_saida(palavras[1], palavras[2], 1);
+    if (status != TASK_OK) {
+        fprintf(stderr, "Erro: append nao definido: %s.\n", mensagem_status(status));
     }
 }
 
@@ -130,6 +167,9 @@ typedef struct {
 
 static const Comando comandos[] = {
     { "task", tratar_task },
+    { "input", tratar_input },
+    { "output", tratar_output },
+    { "append", tratar_append },
     { "run",  tratar_run  },
     { "exit", tratar_exit },
 };
