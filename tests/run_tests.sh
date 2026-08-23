@@ -192,6 +192,175 @@ n=$(echo "$out" | grep -c ":")
 check "paralelo reporta so a tarefa que falhou (${n} linha(s), esperado 1)" $?
 
 echo
+echo "=== FASE 5: REDIRECIONAMENTO ==="
+# Aqui a massa de entrada e $TESTDIR/nomes.txt (versionada). As saidas vao pro
+# /tmp, que e descartavel: teste que suja o repo nao roda duas vezes em paz.
+
+F5=/tmp/pf_f5
+rm -rf $F5; mkdir -p $F5
+SORT=$(command -v sort)
+
+# --- ACEITACAO DA FASE, metade 1: input + output com uma tarefa de ordenacao
+cat > $F5/ordena.pf << EOF
+task ordenar $SORT
+input ordenar $TESTDIR/nomes.txt
+output ordenar $F5/resultado.txt
+run ordenar
+exit
+EOF
+timeout 10 $BIN $F5/ordena.pf >/dev/null 2>&1
+
+[ -f $F5/resultado.txt ]; check "ACEITACAO F5 (1/2): output criou o arquivo" $?
+
+$SORT $TESTDIR/nomes.txt | diff -q - $F5/resultado.txt >/dev/null 2>&1
+check "ACEITACAO F5 (1/2): conteudo ordenado bate com o esperado" $?
+
+# o programa leu do arquivo, nao do stdin herdado: se o input nao tivesse
+# colado, o sort leria do terminal e o arquivo sairia vazio
+[ -s $F5/resultado.txt ]; check "input alimentou mesmo o stdin do filho (arquivo nao vazio)" $?
+
+# nada do redirecionamento pode vazar pro stdout do processflow
+out=$(timeout 10 $BIN $F5/ordena.pf 2>/dev/null)
+! echo "$out" | grep -q "bruno"
+check "a saida da tarefa foi pro arquivo, nao pro stdout do processflow" $?
+
+# --- output trunca: rodar duas vezes deixa uma linha so
+cat > $F5/trunca.pf << EOF
+task eco /bin/echo
+output eco $F5/trunca.txt
+run eco
+run eco
+exit
+EOF
+timeout 10 $BIN $F5/trunca.pf >/dev/null 2>&1
+n=$(wc -l < $F5/trunca.txt)
+[ "$n" -eq 1 ]
+check "output trunca a cada execucao (${n} linha(s), esperado 1)" $?
+
+# --- ACEITACAO DA FASE, metade 2: append duas vezes nao trunca
+rm -f $F5/historico.txt
+cat > $F5/ap1.pf << EOF
+task eco /bin/echo primeira
+append eco $F5/historico.txt
+run eco
+exit
+EOF
+cat > $F5/ap2.pf << EOF
+task eco /bin/echo segunda
+append eco $F5/historico.txt
+run eco
+exit
+EOF
+timeout 10 $BIN $F5/ap1.pf >/dev/null 2>&1
+timeout 10 $BIN $F5/ap2.pf >/dev/null 2>&1
+n=$(wc -l < $F5/historico.txt 2>/dev/null || echo 0)
+[ "$n" -eq 2 ]
+check "ACEITACAO F5 (2/2): dois 'append' somam, nao truncam (${n} linha(s), esperado 2)" $?
+
+[ "$(head -1 $F5/historico.txt 2>/dev/null)" = "primeira" ]
+check "ACEITACAO F5 (2/2): a primeira execucao sobreviveu a segunda" $?
+
+# --- append num arquivo que ja existia preserva o conteudo anterior
+printf 'de antes\n' > $F5/pre.txt
+cat > $F5/pre.pf << EOF
+task eco /bin/echo de_agora
+append eco $F5/pre.txt
+run eco
+exit
+EOF
+timeout 10 $BIN $F5/pre.pf >/dev/null 2>&1
+grep -q "de antes" $F5/pre.txt
+check "append preserva o que ja estava no arquivo" $?
+
+# --- os tres comandos so anexam propriedade: nao executam nada
+out=$(printf "task eco /bin/echo naoDeviaSair\noutput eco $F5/nada.txt\nexit\n" | timeout 5 $BIN 2>/dev/null)
+! echo "$out" | grep -q "naoDeviaSair" && [ ! -f $F5/nada.txt ]
+check "'output' sozinho nao executa a tarefa nem cria o arquivo" $?
+
+# --- o redirecionamento viaja com a tarefa ate o sequencial e o paralelo
+cat > $F5/seq.pf << EOF
+task a /bin/echo tarefa_a
+task b /bin/echo tarefa_b
+output a $F5/sa.txt
+output b $F5/sb.txt
+run sequential a b
+exit
+EOF
+timeout 10 $BIN $F5/seq.pf >/dev/null 2>&1
+grep -q "tarefa_a" $F5/sa.txt 2>/dev/null && grep -q "tarefa_b" $F5/sb.txt 2>/dev/null
+check "redirecionamento vale tambem no 'run sequential'" $?
+
+cat > $F5/par.pf << EOF
+task a /bin/echo paralela_a
+task b /bin/echo paralela_b
+output a $F5/pa.txt
+output b $F5/pb.txt
+run parallel a b
+exit
+EOF
+timeout 10 $BIN $F5/par.pf >/dev/null 2>&1
+grep -q "paralela_a" $F5/pa.txt 2>/dev/null && grep -q "paralela_b" $F5/pb.txt 2>/dev/null
+check "redirecionamento vale tambem no 'run parallel'" $?
+
+# --- redirecionar uma tarefa nao contamina a outra
+# Modo interativo de proposito: o modo workflow ecoa cada linha lida, e o eco
+# do proprio "task com /bin/echo redirecionada" apareceria no stdout, dando
+# falso negativo. Aqui o unico jeito da palavra sair e a tarefa te-la escrito.
+out=$(printf "task com /bin/echo redirecionada\ntask sem /bin/echo no_stdout\noutput com $F5/com.txt\nrun com\nrun sem\nexit\n" | timeout 10 $BIN 2>/dev/null)
+echo "$out" | grep -q "no_stdout"
+check "tarefa sem redirecionamento continua escrevendo no stdout" $?
+! echo "$out" | grep -q "redirecionada"
+check "tarefa com redirecionamento nao escreve no stdout do processflow" $?
+grep -q "redirecionada" $F5/com.txt 2>/dev/null
+check "o texto da tarefa redirecionada foi parar no arquivo" $?
+
+echo
+echo "=== FASE 5: ERROS DE REDIRECIONAMENTO (Fase 10) ==="
+
+# --- arquivo de entrada que nao abre: erro que NAO encerra
+out=$(printf "task ler /bin/cat\ninput ler $F5/nao_existe.txt\nrun ler\ntask viv /bin/echo VIVO\nrun viv\nexit\n" | timeout 5 $BIN 2>&1); rc=$?
+[ $rc -eq 0 ]; check "entrada inexistente NAO encerra o processflow (rc=$rc)" $?
+echo "$out" | grep -q "VIVO"; check "entrada inexistente: o comando seguinte roda" $?
+echo "$out" | grep -qiE "no such file|nao existe|não existe|erro"
+check "entrada inexistente imprime mensagem de erro" $?
+
+# a mensagem tem que sair no stderr, senao suja o arquivo de saida
+out=$(printf "task ler /bin/cat\ninput ler $F5/nao_existe.txt\nrun ler\nexit\n" | timeout 5 $BIN 2>/dev/null)
+! echo "$out" | grep -qiE "no such file|nao existe|não existe"
+check "erro de entrada sai no stderr, nao no stdout" $?
+
+# --- arquivo de saida que nao abre: erro que NAO encerra
+out=$(printf "task eco /bin/echo x\noutput eco /nao/existe/esse/caminho/s.txt\nrun eco\ntask viv /bin/echo VIVO\nrun viv\nexit\n" | timeout 5 $BIN 2>&1); rc=$?
+[ $rc -eq 0 ]; check "saida impossivel NAO encerra o processflow (rc=$rc)" $?
+echo "$out" | grep -q "VIVO"; check "saida impossivel: o comando seguinte roda" $?
+echo "$out" | grep -qiE "no such file|nao existe|não existe|erro"
+check "saida impossivel imprime mensagem de erro" $?
+
+# --- redirecionar tarefa que nao existe
+for cmd in input output append; do
+    out=$(printf "$cmd fantasma /tmp/x.txt\ntask viv /bin/echo VIVO\nrun viv\nexit\n" | timeout 5 $BIN 2>&1)
+    echo "$out" | grep -qiE "erro|nao encontrada|não encontrada|nao existe" && echo "$out" | grep -q "VIVO"
+    check "'$cmd' em tarefa inexistente: erro que nao encerra" $?
+done
+
+# --- numero errado de argumentos
+for cmd in input output append; do
+    out=$(printf "task eco /bin/echo x\n$cmd eco\nexit\n" | timeout 5 $BIN 2>&1)
+    echo "$out" | grep -qiE "erro|uso"
+    check "'$cmd' com argumentos de menos imprime erro" $?
+done
+
+out=$(printf "task eco /bin/echo x\ninput eco a.txt b.txt\nexit\n" | timeout 5 $BIN 2>&1)
+echo "$out" | grep -qiE "erro|uso"
+check "'input' com argumentos de mais imprime erro" $?
+
+# --- a mensagem do output/append nao pode falar em 'entrada' (copy-paste)
+out=$(printf "output fantasma /tmp/x.txt\nexit\n" | timeout 5 $BIN 2>&1)
+! echo "$out" | grep -qi "entrada"
+check "a mensagem de erro do 'output' nao fala em 'entrada'" $?
+
+
+echo
 echo "----------------------------------------"
 echo "$((ok+falhou)) testes, $falhou falha(s)"
 echo
