@@ -4,6 +4,7 @@
 #include <string.h>
 #include "parser.h"
 #include "tasks.h"
+#include "executor.h"
 
 #define MAX_PALAVRAS 64
 
@@ -72,7 +73,8 @@ static void tratar_run(char **palavras, int n) {
         fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[1]);
         return;
     }
-    fprintf(stderr, "Erro: 'run' ainda nao executa a tarefa (Fase 3).\n");
+    pid_t pid = create_process(buscar_tarefa(palavras[1]));
+    wait_process(pid);
 }
 
 static void tratar_exit(char **palavras, int n) {
