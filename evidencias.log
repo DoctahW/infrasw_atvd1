@@ -655,3 +655,354 @@ gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser
 exit
 
 Script done on 2026-08-22 23:21:24-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-23 19:42:29-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/3" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ make
+[?2004lmake: Nothing to be done for 'all'.
+[?2004hbash-5.3$ make clean
+[?2004lrm -f processflow test_tasks objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o objects/executor.d objects/parser.d objects/process_flow.d objects/tasks.d
+rm -rf objects
+[?2004hbash-5.3$ make
+[?2004lmkdir -p objects
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+In file included from [01m[Ksource/process_flow.c:7[m[K:
+[01m[Ksource/executor.h:6:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kredirecionar[m[K’ declared ‘[01m[Kstatic[m[K’ but never defined [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc-16.1.0/gcc/Warning-Options.html#index-Wno-unused-function-Wunused-function]8;;[m[K]
+    6 | static int [01;35m[Kredirecionar[m[K(char *arquivo, int flags, int alvo);
+      |            [01;35m[K^~~~~~~~~~~~[m[K
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make clena
+[?2004lmake: *** No rule to make target 'clena'.  Stop.
+[?2004hbash-5.3$ make clena[K clena[K
+[?2004lmake: *** No rule to make target 'clen'.  Stop.
+[?2004hbash-5.3$  ake[K[K[K[Kmake
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ ./m[Kprocessflow
+[?2004lprocessflow> task listar /bin^[[D    /ls -l
+processflow> task a /bin/echo paralela_a
+task b /bin/echo paralela_bprocessflow> task a
+processflow> task a /bin/echo parar lela  _a
+Erro: tarefa 'a' nao cadastrada: ja existe uma tarefa com esse nome.
+processflow> ^[[A    task b /bin/echo paralela_b
+Erro: tarefa 'b' nao cadastrada: ja existe uma tarefa com esse nome.
+processflow> output a pa.txt
+processflow> output b pa.t   b.txt
+processflow> run parallel a b
+processflow> [?2004hbash-5.3$ make tests
+[?2004lmake: Nothing to be done for 'tests'.
+[?2004hbash-5.3$ make test
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c objects/executor.o objects/parser.o objects/tasks.o
+
+=== PARSER ===
+[01] conta as palavras no retorno                         ok
+[02] tokens corretos                                      ok
+[03] multiplos espacos e tabs                             ok
+[04] linha vazia                                          ok
+[05] respeita o limite quant (nao escreve fora)           ok
+[06] quant = 0 nao escreve nada                           ok
+
+=== TASKS ===
+[07] cadastro simples + busca                             ok
+[08] busca de nome inexistente devolve NULL               ok
+[09] ACEITACAO F2: sobrevive a reescrita do buffer        ok
+[10] recusa nome duplicado                                ok
+[11] recusa quando a tabela enche                         ok
+[12] recusa argc > MAX_ARGS                               ok
+[13] aceita exatamente MAX_ARGS                           ok
+[14] recusa argc negativo                                 ok
+[15] recusa nome longo demais                             ok
+[16] recusa argumento longo demais                        ok
+[17] cadastro que falha nao suja a tabela                 ok
+[18] nao estoura com nome NULL                            ok
+
+=== REDIRECIONAMENTO: a tarefa guarda a propriedade (Fase 5) ===
+[19] campos de redirecionamento nascem vazios             ok
+[20] input guarda o arquivo e nao toca na saida           ok
+[21] output guarda o arquivo com anexo = 0                ok
+[22] append guarda o arquivo com anexo = 1                ok
+[23] output depois de append volta a truncar              ok
+[24] append depois de output liga o anexo                 ok
+[25] input duas vezes: o ultimo vence                     ok
+[26] redirecionar tarefa inexistente devolve erro         ok
+[27] redirecionamento nao vaza para outra tarefa          ok
+[28] caminho longo demais e recusado sem corromper        ok
+[29] redirecionamento sobrevive a reescrita do buffer     ok
+
+=== REDIRECIONAMENTO: a propriedade vira descritor (Fase 5) ===
+[30] output leva o stdout do filho para o arquivo         ok
+[31] input alimenta o stdin do filho                      ok
+[32] ACEITACAO F5 (1/2): ordena arquivo -> arquivo        ok
+[33] output trunca na segunda execucao                    ok
+[34] ACEITACAO F5 (2/2): append duas vezes nao trunca     FALHOU
+      -> append deveria somar: 1 linha(s), conteudo 'segunda
+'
+[35] append preserva arquivo preexistente                 FALHOU
+      -> append apagou o que ja existia: 'de agora
+'
+[36] append cria o arquivo se nao existir                 ok
+[37] entrada inexistente faz o filho falhar, nao o pai    processflow: /tmp/pf_utest_125300/nao_existe_mesmo.txt: No such file or directory
+ok
+[38] saida impossivel faz o filho falhar, nao o pai       processflow: /nao/existe/esse/caminho/saida.txt: No such file or directory
+ok
+[39] CONCEITO: o dup2 nao vaza para o stdout do pai       ok
+[40] CONCEITO: o pai nao fica com o descritor aberto      ok
+
+----------------------------------------
+40 testes, 2 falha(s)
+
+
+=== MODO INTERATIVO ===
+  ok     sai com 'exit' sem travar (rc=0)
+  ok     mostra o prompt processflow>
+  ok     CTRL-D (EOF) sem 'exit' encerra limpo (rc=0)
+  ok     linha vazia nao quebra (rc=0)
+  ok     multiplos espacos nao quebram (rc=0)
+
+=== MODO WORKFLOW ===
+  ok     roda arquivo .pf e sai (rc=0)
+  ok     imprime a linha lida antes de processar
+  ok     NAO mostra prompt no modo workflow
+  ok     arquivo .pf sem 'exit' encerra no EOF (rc=0)
+
+=== ERROS DE INICIALIZACAO ===
+  ok     arquivo inexistente encerra com codigo != 0 (rc=1)
+  ok     arquivo inexistente imprime mensagem
+  ok     argumentos demais encerra com codigo != 0 (rc=1)
+  ok     argumentos demais imprime mensagem
+
+=== COMANDOS DA ESPECIFICACAO ===
+  ok     run executa e entrega TODOS os argumentos (pega off-by-one no argv)
+  ok     run passa a opcao -l (linhas com bits de permissao)
+  ok     run espera o filho terminar (levou 1011ms, esperado >=900)
+  ok     exec que falha imprime mensagem de erro
+  ok     exec que falha NAO cria um segundo processflow (msg 1x, esperado 1)
+  ok     exec que falha NAO encerra o processflow (comando seguinte roda)
+  ok     'run' de tarefa inexistente imprime erro
+  ok     comando desconhecido imprime erro
+
+=== ROBUSTEZ ===
+  ok     linha > 299 chars nao vira dois comandos (prompt apareceu 2x, esperado 2)
+
+=== FASE 4: SEQUENCIAL X PARALELO ===
+  ok     sequencial espera cada tarefa (3+1+2 = ~6s, medido 6018ms)
+  ok     paralelo roda as tres juntas (max(3,1,2) = ~3s, medido 3012ms)
+  ok     paralelo e mais rapido que sequencial (3012ms < 6018ms)
+  ok     avisa que a tarefa inexistente nao existe
+  ok     pula a inexistente e roda as outras duas (~2s, medido 2015ms)
+  ok     'run sequential' sem nenhum nome imprime erro
+  ok     'run sequential' com UM nome so imprime erro (enunciado: mais de uma)
+  ok     'run parallel' sem nenhum nome imprime erro
+  ok     lista toda inexistente nao derruba o processflow
+
+=== CODIGOS DE SAIDA (Fase 10) ===
+  ok     reporta codigo de saida diferente de zero
+  ok     NAO reporta nada quando o codigo e zero (sem ruido)
+  ok     mensagem de status sai no stderr, nao no stdout
+  ok     reporta o codigo exato do programa (timeout -> 124)
+  ok     sequencial reporta so a tarefa que falhou (1 linha(s), esperado 1)
+  ok     paralelo reporta so a tarefa que falhou (1 linha(s), esperado 1)
+
+=== FASE 5: REDIRECIONAMENTO ===
+  ok     ACEITACAO F5 (1/2): output criou o arquivo
+  ok     ACEITACAO F5 (1/2): conteudo ordenado bate com o esperado
+  ok     input alimentou mesmo o stdin do filho (arquivo nao vazio)
+  ok     a saida da tarefa foi pro arquivo, nao pro stdout do processflow
+  ok     output trunca a cada execucao (1 linha(s), esperado 1)
+  FALHA  ACEITACAO F5 (2/2): dois 'append' somam, nao truncam (1 linha(s), esperado 2)
+  FALHA  ACEITACAO F5 (2/2): a primeira execucao sobreviveu a segunda
+  FALHA  append preserva o que ja estava no arquivo
+  ok     'output' sozinho nao executa a tarefa nem cria o arquivo
+  ok     redirecionamento vale tambem no 'run sequential'
+  ok     redirecionamento vale tambem no 'run parallel'
+  ok     tarefa sem redirecionamento continua escrevendo no stdout
+  ok     tarefa com redirecionamento nao escreve no stdout do processflow
+  ok     o texto da tarefa redirecionada foi parar no arquivo
+
+=== FASE 5: ERROS DE REDIRECIONAMENTO (Fase 10) ===
+  ok     entrada inexistente NAO encerra o processflow (rc=0)
+  ok     entrada inexistente: o comando seguinte roda
+  ok     entrada inexistente imprime mensagem de erro
+  ok     erro de entrada sai no stderr, nao no stdout
+  ok     saida impossivel NAO encerra o processflow (rc=0)
+  ok     saida impossivel: o comando seguinte roda
+  ok     saida impossivel imprime mensagem de erro
+  ok     'input' em tarefa inexistente: erro que nao encerra
+  ok     'output' em tarefa inexistente: erro que nao encerra
+  ok     'append' em tarefa inexistente: erro que nao encerra
+  ok     'input' com argumentos de menos imprime erro
+  ok     'output' com argumentos de menos imprime erro
+  ok     'append' com argumentos de menos imprime erro
+  ok     'input' com argumentos de mais imprime erro
+  FALHA  a mensagem de erro do 'output' nao fala em 'entrada'
+
+----------------------------------------
+66 testes, 4 falha(s)
+
+*** ha testes falhando ***
+make: *** [Makefile:32: test] Error 1
+[?2004hbash-5.3$ a[K./processflow
+[?2004lprocessflow> tak sk a /bin/echo oi
+processflow> append a sainda   da.txt
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-23 19:48:00-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-23 19:53:25-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/3" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ make test
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+gcc -std=gnu11 -Wall -Wextra -g -Isource -o test_tasks tests/test_tasks.c objects/executor.o objects/parser.o objects/tasks.o
+
+=== PARSER ===
+[01] conta as palavras no retorno                         ok
+[02] tokens corretos                                      ok
+[03] multiplos espacos e tabs                             ok
+[04] linha vazia                                          ok
+[05] respeita o limite quant (nao escreve fora)           ok
+[06] quant = 0 nao escreve nada                           ok
+
+=== TASKS ===
+[07] cadastro simples + busca                             ok
+[08] busca de nome inexistente devolve NULL               ok
+[09] ACEITACAO F2: sobrevive a reescrita do buffer        ok
+[10] recusa nome duplicado                                ok
+[11] recusa quando a tabela enche                         ok
+[12] recusa argc > MAX_ARGS                               ok
+[13] aceita exatamente MAX_ARGS                           ok
+[14] recusa argc negativo                                 ok
+[15] recusa nome longo demais                             ok
+[16] recusa argumento longo demais                        ok
+[17] cadastro que falha nao suja a tabela                 ok
+[18] nao estoura com nome NULL                            ok
+
+=== REDIRECIONAMENTO: a tarefa guarda a propriedade (Fase 5) ===
+[19] campos de redirecionamento nascem vazios             ok
+[20] input guarda o arquivo e nao toca na saida           ok
+[21] output guarda o arquivo com anexo = 0                ok
+[22] append guarda o arquivo com anexo = 1                ok
+[23] output depois de append volta a truncar              ok
+[24] append depois de output liga o anexo                 ok
+[25] input duas vezes: o ultimo vence                     ok
+[26] redirecionar tarefa inexistente devolve erro         ok
+[27] redirecionamento nao vaza para outra tarefa          ok
+[28] caminho longo demais e recusado sem corromper        ok
+[29] redirecionamento sobrevive a reescrita do buffer     ok
+
+=== REDIRECIONAMENTO: a propriedade vira descritor (Fase 5) ===
+[30] output leva o stdout do filho para o arquivo         ok
+[31] input alimenta o stdin do filho                      ok
+[32] ACEITACAO F5 (1/2): ordena arquivo -> arquivo        ok
+[33] output trunca na segunda execucao                    ok
+[34] ACEITACAO F5 (2/2): append duas vezes nao trunca     ok
+[35] append preserva arquivo preexistente                 ok
+[36] append cria o arquivo se nao existir                 ok
+[37] entrada inexistente faz o filho falhar, nao o pai    processflow: /tmp/pf_utest_127348/nao_existe_mesmo.txt: No such file or directory
+ok
+[38] saida impossivel faz o filho falhar, nao o pai       processflow: /nao/existe/esse/caminho/saida.txt: No such file or directory
+ok
+[39] CONCEITO: o dup2 nao vaza para o stdout do pai       ok
+[40] CONCEITO: o pai nao fica com o descritor aberto      ok
+
+----------------------------------------
+40 testes, 0 falha(s)
+
+
+=== MODO INTERATIVO ===
+  ok     sai com 'exit' sem travar (rc=0)
+  ok     mostra o prompt processflow>
+  ok     CTRL-D (EOF) sem 'exit' encerra limpo (rc=0)
+  ok     linha vazia nao quebra (rc=0)
+  ok     multiplos espacos nao quebram (rc=0)
+
+=== MODO WORKFLOW ===
+  ok     roda arquivo .pf e sai (rc=0)
+  ok     imprime a linha lida antes de processar
+  ok     NAO mostra prompt no modo workflow
+  ok     arquivo .pf sem 'exit' encerra no EOF (rc=0)
+
+=== ERROS DE INICIALIZACAO ===
+  ok     arquivo inexistente encerra com codigo != 0 (rc=1)
+  ok     arquivo inexistente imprime mensagem
+  ok     argumentos demais encerra com codigo != 0 (rc=1)
+  ok     argumentos demais imprime mensagem
+
+=== COMANDOS DA ESPECIFICACAO ===
+  ok     run executa e entrega TODOS os argumentos (pega off-by-one no argv)
+  ok     run passa a opcao -l (linhas com bits de permissao)
+  ok     run espera o filho terminar (levou 1011ms, esperado >=900)
+  ok     exec que falha imprime mensagem de erro
+  ok     exec que falha NAO cria um segundo processflow (msg 1x, esperado 1)
+  ok     exec que falha NAO encerra o processflow (comando seguinte roda)
+  ok     'run' de tarefa inexistente imprime erro
+  ok     comando desconhecido imprime erro
+
+=== ROBUSTEZ ===
+  ok     linha > 299 chars nao vira dois comandos (prompt apareceu 2x, esperado 2)
+
+=== FASE 4: SEQUENCIAL X PARALELO ===
+  ok     sequencial espera cada tarefa (3+1+2 = ~6s, medido 6018ms)
+  ok     paralelo roda as tres juntas (max(3,1,2) = ~3s, medido 3012ms)
+  ok     paralelo e mais rapido que sequencial (3012ms < 6018ms)
+  ok     avisa que a tarefa inexistente nao existe
+  ok     pula a inexistente e roda as outras duas (~2s, medido 2016ms)
+  ok     'run sequential' sem nenhum nome imprime erro
+  ok     'run sequential' com UM nome so imprime erro (enunciado: mais de uma)
+  ok     'run parallel' sem nenhum nome imprime erro
+  ok     lista toda inexistente nao derruba o processflow
+
+=== CODIGOS DE SAIDA (Fase 10) ===
+  ok     reporta codigo de saida diferente de zero
+  ok     NAO reporta nada quando o codigo e zero (sem ruido)
+  ok     mensagem de status sai no stderr, nao no stdout
+  ok     reporta o codigo exato do programa (timeout -> 124)
+  ok     sequencial reporta so a tarefa que falhou (1 linha(s), esperado 1)
+  ok     paralelo reporta so a tarefa que falhou (1 linha(s), esperado 1)
+
+=== FASE 5: REDIRECIONAMENTO ===
+  ok     ACEITACAO F5 (1/2): output criou o arquivo
+  ok     ACEITACAO F5 (1/2): conteudo ordenado bate com o esperado
+  ok     input alimentou mesmo o stdin do filho (arquivo nao vazio)
+  ok     a saida da tarefa foi pro arquivo, nao pro stdout do processflow
+  ok     output trunca a cada execucao (1 linha(s), esperado 1)
+  ok     ACEITACAO F5 (2/2): dois 'append' somam, nao truncam (2 linha(s), esperado 2)
+  ok     ACEITACAO F5 (2/2): a primeira execucao sobreviveu a segunda
+  ok     append preserva o que ja estava no arquivo
+  ok     'output' sozinho nao executa a tarefa nem cria o arquivo
+  ok     redirecionamento vale tambem no 'run sequential'
+  ok     redirecionamento vale tambem no 'run parallel'
+  ok     tarefa sem redirecionamento continua escrevendo no stdout
+  ok     tarefa com redirecionamento nao escreve no stdout do processflow
+  ok     o texto da tarefa redirecionada foi parar no arquivo
+
+=== FASE 5: ERROS DE REDIRECIONAMENTO (Fase 10) ===
+  ok     entrada inexistente NAO encerra o processflow (rc=0)
+  ok     entrada inexistente: o comando seguinte roda
+  ok     entrada inexistente imprime mensagem de erro
+  ok     erro de entrada sai no stderr, nao no stdout
+  ok     saida impossivel NAO encerra o processflow (rc=0)
+  ok     saida impossivel: o comando seguinte roda
+  ok     saida impossivel imprime mensagem de erro
+  ok     'input' em tarefa inexistente: erro que nao encerra
+  ok     'output' em tarefa inexistente: erro que nao encerra
+  ok     'append' em tarefa inexistente: erro que nao encerra
+  ok     'input' com argumentos de menos imprime erro
+  ok     'output' com argumentos de menos imprime erro
+  ok     'append' com argumentos de menos imprime erro
+  ok     'input' com argumentos de mais imprime erro
+  ok     a mensagem de erro do 'output' nao fala em 'entrada'
+
+----------------------------------------
+66 testes, 0 falha(s)
+
+[?2004hbash-5.3$ ./processflow
+[?2004lprocessflow> make    te ask a /bin/echo oi
+processflow> apeend    ppe  end a teste.txt
+processflow> run a
+processflow> eun   run a
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-23 19:57:06-03:00 [COMMAND_EXIT_CODE="0"]
