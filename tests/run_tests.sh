@@ -361,6 +361,146 @@ check "a mensagem de erro do 'output' nao fala em 'entrada'" $?
 
 
 echo
+echo "=== FASE 6: PIPE ==="
+# Massa: $TESTDIR/nomes.txt (10 nomes desordenados, primeiro alfabetico
+# = "adriana"). O criterio desta fase e DUPLO e as duas metades importam:
+# resultado certo E o comando terminar sozinho. Pipeline que pendura e o
+# sintoma classico de ponta de escrita nao fechada -- por isso todo teste
+# aqui passa por 'timeout' e confere o rc.
+#
+# Tudo roda por arquivo .pf, nunca por stdin: no modo interativo o prompt
+# sai no stdout e gruda na linha ("processflow> 10"), o que quebraria o
+# 'grep -x'. Por arquivo a saida e limpa e a linha exata pode ser exigida.
+
+F6=/tmp/pf_f6
+rm -rf $F6; mkdir -p $F6
+CAT=$(command -v cat)
+WC=$(command -v wc)
+HEAD=$(command -v head)
+
+pipe_pf() {   # pipe_pf <arquivo.pf> <linhas...>  -> monta um .pf com as 3 tarefas padrao
+    local f=$1; shift
+    {
+        echo "task listar $CAT $TESTDIR/nomes.txt"
+        echo "task ordenar $SORT"
+        echo "task contar $WC -l"
+        printf '%s\n' "$@"
+        echo "exit"
+    } > "$f"
+}
+
+# --- ACEITACAO DA FASE: as duas metades, no mesmo teste
+pipe_pf $F6/aceita.pf "run pipe listar ordenar contar"
+out=$(timeout 10 $BIN $F6/aceita.pf 2>/dev/null); rc=$?
+[ $rc -eq 0 ]
+check "ACEITACAO F6 (1/2): o pipeline TERMINA sozinho (rc=$rc, 124=pendurou)" $?
+
+echo "$out" | grep -qx "10"
+check "ACEITACAO F6 (2/2): 'run pipe listar ordenar contar' conta 10" $?
+
+# --- os dados atravessam NA ORDEM: se cada tarefa rodasse solta, o head
+# nao veria a saida do sort e o primeiro nome nao seria o alfabetico
+cat > $F6/ordem.pf << EOF
+task listar $CAT $TESTDIR/nomes.txt
+task ordenar $SORT
+task topo $HEAD -1
+run pipe listar ordenar topo
+exit
+EOF
+out=$(timeout 10 $BIN $F6/ordem.pf 2>/dev/null)
+echo "$out" | grep -qx "adriana"
+check "o pipeline encadeia de verdade (1o nome ordenado = adriana)" $?
+
+# --- pipeline de DUAS tarefas: o caso minimo, 1 canal so
+pipe_pf $F6/duas.pf "run pipe listar contar"
+out=$(timeout 10 $BIN $F6/duas.pf 2>/dev/null)
+echo "$out" | grep -qx "10"
+check "pipeline de 2 tarefas (1 canal) funciona" $?
+
+# --- VOLUME: este e o teste que separa "funcionou" de "esta certo".
+# O buffer de um pipe e ~64K. Com 10 linhas cabe tudo no buffer e um
+# descritor esquecido passa despercebido; com ~1.3MB o escritor bloqueia
+# e o pipeline pendura se alguem ainda segura uma ponta de escrita.
+seq 1 200000 > $F6/grande.txt
+cat > $F6/volume.pf << EOF
+task despejar $CAT $F6/grande.txt
+task ordenar $SORT
+task contar $WC -l
+run pipe despejar ordenar contar
+exit
+EOF
+out=$(timeout 30 $BIN $F6/volume.pf 2>/dev/null); rc=$?
+[ $rc -eq 0 ]
+check "200k linhas atravessam sem pendurar (rc=$rc) -- pega ponta nao fechada" $?
+echo "$out" | grep -qx "200000"
+check "200k linhas: a contagem final esta certa" $?
+
+# --- VAZAMENTO DE DESCRITOR NO PAI: 300 pipelines x 2 canais = 1200 fds.
+# O limite comum e 1024. Se o pai nao fechar as pontas, esgota no meio.
+{
+    echo "task listar $CAT $TESTDIR/nomes.txt"
+    echo "task ordenar $SORT"
+    echo "task contar $WC -l"
+    for _ in $(seq 1 300); do echo "run pipe listar ordenar contar"; done
+    echo "exit"
+} > $F6/muitos.pf
+out=$(timeout 60 $BIN $F6/muitos.pf 2>/dev/null); rc=$?
+[ $rc -eq 0 ]
+check "300 pipelines na mesma sessao nao derrubam o processflow (rc=$rc)" $?
+n=$(echo "$out" | grep -cx "10")
+[ "$n" -eq 300 ]
+check "os 300 pipelines dao 10 (${n}/300) -- pega vazamento de fd no pai" $?
+
+# --- TAREFA INEXISTENTE NO MEIO: o bug "errado mas plausivel".
+# 'listar | fantasma | contar' NAO pode virar 'listar | contar': daria 10,
+# um numero certo para o pipeline errado. Tem que abortar.
+pipe_pf $F6/faltando.pf "run pipe listar fantasma contar"
+out=$(timeout 10 $BIN $F6/faltando.pf 2>&1)
+echo "$out" | grep -qi "fantasma"
+check "pipe com tarefa inexistente avisa qual faltou" $?
+! echo "$out" | grep -qx "10"
+check "pipe com tarefa inexistente ABORTA (nao vira pipeline curto e plausivel)" $?
+
+# --- as guardas de aridade
+pipe_pf $F6/vazio.pf "run pipe"
+out=$(timeout 5 $BIN $F6/vazio.pf 2>&1)
+echo "$out" | grep -qiE "erro|uso"
+check "'run pipe' sem nenhum nome imprime erro" $?
+
+pipe_pf $F6/um.pf "run pipe listar"
+out=$(timeout 5 $BIN $F6/um.pf 2>&1)
+echo "$out" | grep -qiE "erro|uso"
+check "'run pipe' com UM nome so imprime erro (pipeline precisa de 2+)" $?
+
+# --- a sessao sobrevive a tudo isso
+pipe_pf $F6/mortos.pf "run pipe nada1 nada2" "task viv /bin/echo vivo" "run viv"
+out=$(timeout 10 $BIN $F6/mortos.pf 2>/dev/null)
+echo "$out" | grep -qx "vivo"
+check "pipe todo inexistente nao derruba a sessao" $?
+
+pipe_pf $F6/depois.pf "run pipe listar contar" "task viv /bin/echo vivo" "run viv"
+out=$(timeout 10 $BIN $F6/depois.pf 2>/dev/null)
+echo "$out" | grep -qx "vivo"
+check "o comando depois do pipe roda (o pai nao foi substituido pelo exec)" $?
+
+# --- o pai nao virou filho: o processflow nao pode se duplicar.
+# No modo workflow cada linha e ecoada UMA vez; se algum fork escapasse
+# sem exec, o filho seguiria lendo o .pf e ecoaria de novo.
+n=$(timeout 10 $BIN $F6/duas.pf 2>/dev/null | grep -cx "run pipe listar contar")
+[ "$n" -eq 1 ]
+check "o processflow nao se duplica no pipeline (${n} eco(s), esperado 1)" $?
+
+# --- Fase 5 x Fase 6: 'output' na ULTIMA tarefa do pipeline.
+# Este caso nao tem conflito com o canal (a ultima nao escreve em pipe
+# nenhum), entao o arquivo tem que receber o resultado.
+pipe_pf $F6/comoutput.pf "output contar $F6/saida.txt" "run pipe listar contar"
+out=$(timeout 10 $BIN $F6/comoutput.pf 2>/dev/null)
+[ -f $F6/saida.txt ] && grep -qx "10" $F6/saida.txt
+check "'output' na ultima tarefa do pipeline escreve no arquivo" $?
+! echo "$out" | grep -qx "10"
+check "com 'output', o 10 NAO sai no stdout do processflow" $?
+
+echo
 echo "----------------------------------------"
 echo "$((ok+falhou)) testes, $falhou falha(s)"
 echo
