@@ -303,7 +303,8 @@ void leitura(FILE *arquivo, int modo){
     while (running) {
         colher_jobs();
         if (modo == 1){
-            printf("processflow> ");
+            fprintf(stderr, "processflow> ");
+            fflush(stderr);
         }
         fflush(stdout);
         char *result = fgets(buffer, 300, arquivo);

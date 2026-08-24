@@ -28,7 +28,14 @@ echo "=== MODO INTERATIVO ==="
 out=$(echo "exit" | timeout 5 $BIN); rc=$?
 [ $rc -eq 0 ]; check "sai com 'exit' sem travar (rc=$rc)" $?
 
-echo "$out" | grep -q "processflow>"; check "mostra o prompt processflow>" $?
+# O prompt e MOLDURA, nao dado: vive no stderr (item 3.29), pela mesma regra do
+# 3.5 que mandou os erros para la. Duas assercoes, porque uma so nao separa
+# "esta no stderr" de "sumiu".
+err=$(echo "exit" | timeout 5 $BIN 2>&1 >/dev/null)
+echo "$err" | grep -q "processflow>"; check "mostra o prompt processflow> (no stderr)" $?
+
+! echo "$out" | grep -q "processflow>"
+check "o prompt NAO polui o stdout (stdout e so dado)" $?
 
 out=$(printf "" | timeout 5 $BIN); rc=$?
 [ $rc -eq 0 ]; check "CTRL-D (EOF) sem 'exit' encerra limpo (rc=$rc)" $?
@@ -52,8 +59,11 @@ out=$(timeout 5 $BIN /tmp/wf1.pf); rc=$?
 
 echo "$out" | grep -q "task listar /bin/ls -l"; check "imprime a linha lida antes de processar" $?
 
-echo "$out" | grep -q "processflow>"; ! echo "$out" | grep -q "processflow>"
-check "NAO mostra prompt no modo workflow" $?
+# Captura os DOIS canais: com o prompt no stderr, olhar so o stdout faria esta
+# assercao passar trivialmente e deixar de provar qualquer coisa.
+ambos=$(timeout 5 $BIN /tmp/wf1.pf 2>&1)
+! echo "$ambos" | grep -q "processflow>"
+check "NAO mostra prompt no modo workflow (nem stdout nem stderr)" $?
 
 cat > /tmp/wf2.pf << 'EOF'
 task listar /bin/ls
@@ -166,7 +176,11 @@ out=$(printf "task f /bin/false\nrun f\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null
 echo "$out" | grep -q "1"
 check "reporta codigo de saida diferente de zero" $?
 
-out=$(printf "task ok /bin/echo tudo_bem\nrun ok\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null)
+# Desde o 3.29 o prompt tambem vive no stderr, entao "stderr vazio" deixou de
+# ser prova de "sem ruido". A assercao continua a mesma -- reportar_status
+# silencia no codigo 0 -- mas agora desconta a moldura antes de olhar.
+out=$(printf "task ok /bin/echo tudo_bem\nrun ok\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null \
+      | sed 's/processflow> //g' | tr -d '[:space:]')
 [ -z "$out" ]
 check "NAO reporta nada quando o codigo e zero (sem ruido)" $?
 
