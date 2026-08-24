@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "tasks.h"
 #include "executor.h"
+#include "jobs.h"
 
 #define MAX_PALAVRAS 64
 
@@ -193,6 +194,75 @@ static void tratar_exit(char **palavras, int n) {
     running = false;
 }
 
+static void tratar_start(char **palavras, int n) {
+    if (n != 2) {
+        fprintf(stderr, "Erro: uso: start <tarefa>\n");
+        return;
+    }
+
+    Tarefa *tarefa = buscar_tarefa(palavras[1]);
+    if (tarefa == NULL) {
+        fprintf(stderr, "Erro: tarefa '%s' nao existe.\n", palavras[1]);
+        return;
+    }
+
+    if (!ha_espaco_job()) {
+        fprintf(stderr, "Erro: a tabela de jobs esta cheia.\n");
+        return;
+    }
+
+    pid_t pid = create_process(tarefa);
+    if (pid <= 0) {
+        return;
+    }
+
+    int id = registrar_job(pid, tarefa);
+    if (id < 0) {
+        fprintf(stderr, "Erro: nao foi possivel registrar o job.\n");
+        return;
+    }
+
+    printf("[%d] %d\n", id, (int)pid);
+    fflush(stdout);
+}
+
+static void tratar_jobs(char **palavras, int n) {
+    (void)palavras;
+    if (n != 1) {
+        fprintf(stderr, "Erro: uso: jobs\n");
+        return;
+    }
+    colher_jobs();
+    listar_jobs();
+}
+
+static void tratar_wait(char **palavras, int n) {
+    if (n != 2) {
+        fprintf(stderr, "Erro: uso: wait <jobId>\n");
+        return;
+    }
+
+    char *fim;
+    errno = 0;
+    long id = strtol(palavras[1], &fim, 10);
+    if (errno != 0 || fim == palavras[1] || *fim != '\0' || id <= 0) {
+        fprintf(stderr, "Erro: '%s' nao e um id de job valido.\n", palavras[1]);
+        return;
+    }
+
+    Job *job = buscar_job((int)id);
+    if (job == NULL) {
+        fprintf(stderr, "Erro: job [%ld] nao existe.\n", id);
+        return;
+    }
+
+    if (esperar_job(job)) {
+        reportar_status(job->tarefa, job->status);
+    } else {
+        fprintf(stderr, "Erro: desfecho do job [%d] desconhecido.\n", job->id);
+    }
+}
+
 typedef struct {
     char *nome;
     void (*tratador)(char **palavras, int n);
@@ -204,6 +274,9 @@ static const Comando comandos[] = {
     { "output", tratar_output },
     { "append", tratar_append },
     { "workdir", tratar_workdir },
+    { "start", tratar_start },
+    { "jobs", tratar_jobs },
+    { "wait", tratar_wait },
     { "run",  tratar_run  },
     { "exit", tratar_exit },
 };
@@ -228,6 +301,7 @@ void leitura(FILE *arquivo, int modo){
     char *palavras[MAX_PALAVRAS];
 
     while (running) {
+        colher_jobs();
         if (modo == 1){
             printf("processflow> ");
         }
@@ -251,6 +325,7 @@ void leitura(FILE *arquivo, int modo){
         int n = dividir_palavras(buffer, palavras, MAX_PALAVRAS);
         despachar(palavras, n);
     }
+    drenar_jobs();
 }
 
 int main (int argc, char *argv[]){

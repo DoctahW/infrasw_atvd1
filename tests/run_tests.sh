@@ -502,6 +502,245 @@ check "com 'output', o 10 NAO sai no stdout do processflow" $?
 
 
 echo
+echo "=== FASE 7: BACKGROUND (start / jobs / wait) ==="
+# Formato adotado: 'start' imprime "[id] pid"; 'jobs' imprime
+# "[id] pid Estado nome", com Estado em {Rodando, Concluido(N),
+# Concluido(sinal:N), Perdido}. Decisao registrada no PLANO: 'exit' DRENA --
+# espera os jobs vivos antes de encerrar, porque o enunciado responsabiliza o
+# ProcessFlow pela coleta dos filhos que ele criou.
+
+F7=/tmp/pf_f7
+rm -rf $F7; mkdir -p $F7
+
+# Trava de sanidade: enquanto os tres comandos nao existirem no despacho, o
+# binario responde "comando desconhecido" -- que tambem escreve no stderr e
+# tambem nao encerra. Sem isto, os testes de ERRO abaixo passariam por acidente.
+err=$(printf "start\njobs\nwait\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null)
+! echo "$err" | grep -qi "desconhecido"
+check "'start', 'jobs' e 'wait' sao comandos reconhecidos pelo despacho" $?
+
+# --- ACEITACAO F7 (1/4): 'start' imprime "[id] pid" e devolve o controle.
+cat > $F7/basico.pf << 'EOF'
+task dormir /bin/sleep 2
+start dormir
+jobs
+exit
+EOF
+out=$(timeout 20 $BIN $F7/basico.pf 2>/dev/null)
+
+echo "$out" | grep -qE '^\[1\] [0-9]+$'
+check "ACEITACAO F7 (1/4): 'start' imprime [id] pid" $?
+
+# Esta e a assercao que prova que 'start' NAO bloqueou: se ele tivesse
+# esperado, o sleep ja teria acabado quando o 'jobs' rodou, e o estado seria
+# Concluido. Ver "Rodando" so e possivel se o controle voltou na hora.
+echo "$out" | grep -qE '^\[1\] [0-9]+ Rodando dormir$'
+check "ACEITACAO F7 (2/4): o controle volta na hora ('jobs' pega o job vivo)" $?
+
+# --- ACEITACAO F7 (3/4): 'wait <id>' bloqueia ate aquele job terminar.
+# Prova logica, sem depender de relogio: se o 'wait' nao bloqueasse, o 'jobs'
+# seguinte ainda mostraria Rodando.
+cat > $F7/espera.pf << 'EOF'
+task dormir /bin/sleep 2
+start dormir
+wait 1
+jobs
+exit
+EOF
+out=$(timeout 20 $BIN $F7/espera.pf 2>/dev/null)
+echo "$out" | grep -qE '^\[1\] [0-9]+ Concluido\(0\) dormir$'
+check "ACEITACAO F7 (3/4): depois do 'wait', 'jobs' mostra o estado atualizado" $?
+
+# --- ACEITACAO F7 (4/4): e bloqueia DE VERDADE (prova cronometrada).
+ms=$(cronometra $F7/espera.pf)
+[ "$ms" -ge 1900 ]
+check "ACEITACAO F7 (4/4): 'wait' realmente bloqueia (${ms} ms, esperado >=1900)" $?
+
+# --- CONCORRENCIA REAL: dois jobs de 2 s cada.
+# Se 'start' bloqueasse, seriam ~4 s. Este teste separa "voltou o prompt"
+# de "os dois processos existem ao mesmo tempo".
+cat > $F7/dois.pf << 'EOF'
+task dormir /bin/sleep 2
+start dormir
+start dormir
+jobs
+exit
+EOF
+out=$(timeout 30 $BIN $F7/dois.pf 2>/dev/null)
+ms=$(cronometra $F7/dois.pf)
+[ "$ms" -lt 3500 ] && [ "$ms" -ge 1900 ]
+check "dois jobs de 2s rodam CONCORRENTES (${ms} ms, esperado 1900..3500)" $?
+
+n=$(echo "$out" | grep -cE '^\[[12]\] [0-9]+ Rodando dormir$')
+[ "$n" -eq 2 ]
+check "os dois jobs aparecem no 'jobs' (${n} linha(s), esperado 2)" $?
+
+echo "$out" | grep -qE '^\[2\] ' 
+check "o segundo job recebe id 2 (ids sao sequenciais)" $?
+
+# --- COLETA AUTOMATICA: requisito literal do enunciado.
+# "O ProcessFlow e responsavel por coletar corretamente o termino dos
+# processos filhos que criar." Ninguem pede 'wait' do job 1 aqui: ele tem que
+# ser colhido sozinho, e o 'jobs' tem que refletir isso.
+cat > $F7/coleta.pf << 'EOF'
+task rapido /bin/true
+task dormir /bin/sleep 2
+start rapido
+start dormir
+wait 2
+jobs
+exit
+EOF
+out=$(timeout 20 $BIN $F7/coleta.pf 2>/dev/null)
+echo "$out" | grep -qE '^\[1\] [0-9]+ Concluido\(0\) rapido$'
+check "COLETA: job que ninguem esperou e colhido sozinho" $?
+
+# --- o codigo de saida do job sobrevive ate o 'jobs' perguntar.
+# E para isto que a entrada da tabela guarda o 'status' cru: quem colhe
+# descobre o desfecho, mas quem pergunta e o 'jobs', bem depois.
+cat > $F7/codigo.pf << 'EOF'
+task falha /bin/false
+task dormir /bin/sleep 1
+start falha
+start dormir
+wait 2
+jobs
+exit
+EOF
+out=$(timeout 20 $BIN $F7/codigo.pf 2>/dev/null)
+echo "$out" | grep -qE '^\[1\] [0-9]+ Concluido\(1\) falha$'
+check "o codigo de saida do job sobrevive ate o 'jobs' perguntar" $?
+
+# --- id nunca e reutilizado dentro da sessao
+cat > $F7/ids.pf << 'EOF'
+task rapido /bin/true
+start rapido
+wait 1
+start rapido
+jobs
+exit
+EOF
+out=$(timeout 20 $BIN $F7/ids.pf 2>/dev/null)
+# O estado do job 2 aqui e uma CORRIDA (/bin/true pode nem ter sido colhido
+# quando o 'jobs' roda), entao a assercao olha so o id -- que e o que ela diz
+# testar. Fixar o estado aqui deixaria o teste vermelho por acaso.
+echo "$out" | grep -qE '^\[2\] [0-9]+ (Rodando|Concluido|Perdido) rapido$'
+check "id nao e reutilizado: o job depois do 'wait' recebe id 2" $?
+
+n=$(echo "$out" | grep -cE '^\[[0-9]+\] [0-9]+ (Rodando|Concluido|Perdido)')
+[ "$n" -eq 2 ]
+check "job concluido CONTINUA listado (${n} linha(s), esperado 2)" $?
+
+# --- 'jobs' sem nenhum job nao imprime nada e nao quebra
+out=$(printf "jobs\nexit\n" | timeout 5 $BIN 2>/dev/null); rc=$?
+! echo "$out" | grep -q '^\['
+check "'jobs' com a tabela vazia nao imprime linha de job" $?
+
+# --- ERROS (Fase 10): job inexistente e id invalido.
+# Nenhum deles pode encerrar a sessao.
+cat > $F7/erros.pf << 'EOF'
+wait 99
+wait abc
+wait 0
+wait -1
+wait 1x
+task eco /bin/echo sobrevivi
+run eco
+exit
+EOF
+out=$(timeout 10 $BIN $F7/erros.pf 2>$F7/erros.err); rc=$?
+n=$(grep -c "" $F7/erros.err)
+[ "$n" -eq 5 ]
+check "os 5 'wait' invalidos dao 5 erros (${n} linha(s), esperado 5)" $?
+
+grep -q "job \[99\] nao existe" $F7/erros.err
+check "job inexistente diz QUAL job faltou" $?
+
+grep -q "'abc' nao e um id de job valido" $F7/erros.err
+check "id nao-numerico e recusado (nao vira job 0 por atoi)" $?
+
+echo "$out" | grep -qx "sobrevivi"
+check "a sessao sobrevive a todos os 'wait' invalidos" $?
+[ $rc -eq 0 ]
+check "erros de 'wait' NAO encerram a sessao (rc=$rc)" $?
+
+# --- 'start' de tarefa inexistente nao pode criar job nenhum.
+# O bug plausivel aqui e registrar primeiro e descobrir depois.
+cat > $F7/fantasma.pf << 'EOF'
+start fantasma
+jobs
+exit
+EOF
+out=$(timeout 10 $BIN $F7/fantasma.pf 2>$F7/fantasma.err); rc=$?
+[ -s $F7/fantasma.err ] && [ $rc -eq 0 ]
+check "'start' de tarefa inexistente da erro e nao encerra (rc=$rc)" $?
+! echo "$out" | grep -q '^\['
+check "'start' de tarefa inexistente NAO cria entrada na tabela de jobs" $?
+
+# --- aridade dos tres comandos
+err=$(printf "start\nstart a b\njobs extra\nwait\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null); rc=$?
+n=$(echo "$err" | grep -c "uso:")
+[ "$n" -eq 4 ] && [ $rc -eq 0 ]
+check "aridade errada nos 3 comandos da 4 erros de uso (${n}, esperado 4)" $?
+
+# --- 'exit' com job vivo DRENA: espera antes de encerrar.
+# Decisao de projeto, nao acidente -- o enunciado responsabiliza o ProcessFlow
+# pela coleta dos filhos que criou, e sair na frente deixaria orfao.
+cat > $F7/drena.pf << 'EOF'
+task dormir /bin/sleep 2
+start dormir
+exit
+EOF
+ms=$(cronometra $F7/drena.pf)
+[ "$ms" -ge 1900 ]
+check "'exit' com job vivo espera o job terminar (${ms} ms, esperado >=1900)" $?
+
+err=$(timeout 20 $BIN $F7/drena.pf 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && [ $rc -eq 0 ]
+check "'exit' com job vivo avisa que esta aguardando (rc=$rc)" $?
+
+# --- 'wait' num job JA concluido nao pode bloquear nem falhar.
+# E a invariante "nunca chamar waitpid sobre job ja concluido": o filho nao
+# existe mais, entao um waitpid ali devolveria ECHILD.
+cat > $F7/jaconcluido.pf << 'EOF'
+task rapido /bin/true
+task dormir /bin/sleep 1
+start rapido
+start dormir
+wait 2
+wait 1
+wait 1
+jobs
+exit
+EOF
+ms=$(cronometra $F7/jaconcluido.pf)
+[ "$ms" -lt 3000 ]
+check "'wait' repetido em job ja concluido nao trava (${ms} ms, esperado <3000)" $?
+
+out=$(timeout 20 $BIN $F7/jaconcluido.pf 2>/dev/null)
+echo "$out" | grep -qE '^\[1\] [0-9]+ Concluido\(0\) rapido$'
+check "'wait' repetido nao corrompe o estado do job" $?
+
+# --- FASE 5 x FASE 7: 'start' respeita o redirecionamento da tarefa.
+cat > $F7/comsaida.pf << EOF
+task escrever /bin/echo saida-de-background
+output escrever $F7/bg.txt
+start escrever
+exit
+EOF
+timeout 20 $BIN $F7/comsaida.pf >$F7/comsaida.out 2>/dev/null
+[ -f $F7/bg.txt ] && grep -qx "saida-de-background" $F7/bg.txt
+check "'start' respeita o 'output' da tarefa (o drenar garante que terminou)" $?
+! grep -qx "saida-de-background" $F7/comsaida.out
+check "...e o texto NAO sai no stdout do processflow" $?
+
+# --- o processflow nao se duplica: se algum fork escapasse sem exec, o filho
+# seguiria lendo o .pf e ecoaria as linhas de novo.
+n=$(timeout 20 $BIN $F7/basico.pf 2>/dev/null | grep -cx "start dormir")
+[ "$n" -eq 1 ]
+check "o processflow nao se duplica no 'start' (${n} eco(s), esperado 1)" $?
+
+echo
 echo "=== FASE 8: WORKDIR ==="
 # Decisao registrada no PLANO (opcao 'a'): 'workdir' muda o diretorio do
 # PROPRIO processflow, como o 'cd' de um shell. Estes testes existem para

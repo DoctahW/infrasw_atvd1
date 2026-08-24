@@ -1553,3 +1553,77 @@ processflow> [?2004hbash-5.3$ [?2004l
 exit
 
 Script done on 2026-08-24 16:31:44-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-24 17:28:07-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/2" COLUMNS="91" LINES="40"]
+[?2004hbash-5.3$ make
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/jobs.c -o objects/jobs.o
+[01m[Ksource/jobs.c:[m[K In function ‘[01m[Klistar_jobs[m[K’:
+[01m[Ksource/jobs.c:82:42:[m[K [01;31m[Kerror: [m[K‘[01m[KTarefa[m[K’ has no member named ‘[01m[Knome[m[K’; did you mean ‘[01m[Kname[m[K’?
+   82 |                estado, tabela[i].tarefa->[01;31m[Knome[m[K);
+      |                                          [01;31m[K^~~~[m[K
+      |                                          [32m[Kname[m[K
+make: *** [Makefile:23: objects/jobs.o] Error 1
+[?2004hbash-5.3$ make
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/jobs.c -o objects/jobs.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/jobs.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make clear
+[?2004lmake: *** No rule to make target 'clear'.  Stop.
+[?2004hbash-5.3$ am[K[Kma [Kke cleam[Kn
+[?2004lrm -f processflow test_tasks objects/executor.o objects/jobs.o objects/parser.o objects/process_flow.o objects/tasks.o objects/executor.d objects/jobs.d objects/parser.d objects/process_flow.d objects/tasks.d
+rm -rf objects
+[?2004hbash-5.3$ make
+[?2004lmkdir -p objects
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/executor.c -o objects/executor.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/jobs.c -o objects/jobs.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/parser.c -o objects/parser.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+[01m[Ksource/process_flow.c:197:13:[m[K [01;35m[Kwarning: [m[K‘[01m[Ktratar_start[m[K’ defined but not used [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc-16.1.0/gcc/Warning-Options.html#index-Wno-unused-function-Wunused-function]8;;[m[K]
+  197 | static void [01;35m[Ktratar_start[m[K(char **palavras, int n) {
+      |             [01;35m[K^~~~~~~~~~~~[m[K
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/tasks.c -o objects/tasks.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/jobs.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ make
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/jobs.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ ./processfolo[K[K[Klow
+[?2004lprocessflow> start
+Erro: uso: start <tarefa>
+processflow> ts  ma  task bi/ n/sleep 10^[[D    ^[[D                sleep bin/sleep 10
+processflow> start sleep
+[1] 280888
+processflow> processflow: bin/sleep: No such file or directory
+[?2004hbash-5.3$ ./processflow
+[?2004lprocessflow> task sleep bin/sleep 10^[[D^[[D^[[D^[[D^[[D^[[D^[[D^[[D^[[D^[[D                                                    /bin/sleep 10
+processflow> start sleep
+[1] 280986
+processflow> jobs
+Erro: comando desconhecido: 'jobs'.
+processflow> [?2004hbash-5.3$ [Kbash-5.3$ [Kbash-5.3$ make
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/jobs.c -o objects/jobs.o
+gcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/jobs.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ sta[K[K[Km[K./processfow[K[Klow
+[?2004lprocessflow> task sleep10 /bin/sleep 10  
+processflow> start see l  leep  10
+[1] 283188
+processflow> jobs
+[1] 283188 Rodando sleep10
+processflow> jogb  bs
+[1] 283188 Concluido(0) sleep10
+processflow> jobs
+[1] 283188 Concluido(0) sleep10
+processflow> start sl  sleep  10
+[2] 283242
+processflow> wait 1
+processflow> jobs
+[1] 283188 Concluido(0) sleep10
+[2] 283242 Rodando sleep10
+processflow> jobs
+[1] 283188 Concluido(0) sleep10
+[2] 283242 Rodando sleep10
+processflow> jobs
+[1] 283188 Concluido(0) sleep10
+[2] 283242 Concluido(0) sleep10
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-24 17:47:15-03:00 [COMMAND_EXIT_CODE="0"]
