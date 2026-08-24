@@ -1348,3 +1348,208 @@ ok
 exit
 
 Script done on 2026-08-23 23:45:05-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-24 16:28:20-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/2" COLUMNS="91" LINES="19"]
+[?2004hbash-5.3$ make
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ ./processflow
+[?2004lprocessflow> workdir i
+Erro: workdir nao definido: No such file or directory.
+processflow> workdir objects
+processflow> [?2004hbash-5.3$ make test
+[?2004l
+=== PARSER ===
+[01] conta as palavras no retorno                         ok
+[02] tokens corretos                                      ok
+[03] multiplos espacos e tabs                             ok
+[04] linha vazia                                          ok
+[05] respeita o limite quant (nao escreve fora)           ok
+[06] quant = 0 nao escreve nada                           ok
+
+=== TASKS ===
+[07] cadastro simples + busca                             ok
+[08] busca de nome inexistente devolve NULL               ok
+[09] ACEITACAO F2: sobrevive a reescrita do buffer        ok
+[10] recusa nome duplicado                                ok
+[11] recusa quando a tabela enche                         ok
+[12] recusa argc > MAX_ARGS                               ok
+[13] aceita exatamente MAX_ARGS                           ok
+[14] recusa argc negativo                                 ok
+[15] recusa nome longo demais                             ok
+[16] recusa argumento longo demais                        ok
+[17] cadastro que falha nao suja a tabela                 ok
+[18] nao estoura com nome NULL                            ok
+
+=== REDIRECIONAMENTO: a tarefa guarda a propriedade (Fase 5) ===
+[19] campos de redirecionamento nascem vazios             ok
+[20] input guarda o arquivo e nao toca na saida           ok
+[21] output guarda o arquivo com anexo = 0                ok
+[22] append guarda o arquivo com anexo = 1                ok
+[23] output depois de append volta a truncar              ok
+[24] append depois de output liga o anexo                 ok
+[25] input duas vezes: o ultimo vence                     ok
+[26] redirecionar tarefa inexistente devolve erro         ok
+[27] redirecionamento nao vaza para outra tarefa          ok
+[28] caminho longo demais e recusado sem corromper        ok
+[29] redirecionamento sobrevive a reescrita do buffer     ok
+
+=== REDIRECIONAMENTO: a propriedade vira descritor (Fase 5) ===
+[30] output leva o stdout do filho para o arquivo         ok
+[31] input alimenta o stdin do filho                      ok
+[32] ACEITACAO F5 (1/2): ordena arquivo -> arquivo        ok
+[33] output trunca na segunda execucao                    ok
+[34] ACEITACAO F5 (2/2): append duas vezes nao trunca     ok
+[35] append preserva arquivo preexistente                 ok
+[36] append cria o arquivo se nao existir                 ok
+[37] entrada inexistente faz o filho falhar, nao o pai    processflow: /tmp/pf_utest_262582/nao_existe_mesmo.txt: No such file or directory
+ok
+[38] saida impossivel faz o filho falhar, nao o pai       processflow: /nao/existe/esse/caminho/saida.txt: No such file or directory
+ok
+[39] CONCEITO: o dup2 nao vaza para o stdout do pai       ok
+[40] CONCEITO: o pai nao fica com o descritor aberto      ok
+
+----------------------------------------
+40 testes, 0 falha(s)
+
+
+=== MODO INTERATIVO ===
+  ok     sai com 'exit' sem travar (rc=0)
+  ok     mostra o prompt processflow>
+  ok     CTRL-D (EOF) sem 'exit' encerra limpo (rc=0)
+  ok     linha vazia nao quebra (rc=0)
+  ok     multiplos espacos nao quebram (rc=0)
+
+=== MODO WORKFLOW ===
+  ok     roda arquivo .pf e sai (rc=0)
+  ok     imprime a linha lida antes de processar
+  ok     NAO mostra prompt no modo workflow
+  ok     arquivo .pf sem 'exit' encerra no EOF (rc=0)
+
+=== ERROS DE INICIALIZACAO ===
+  ok     arquivo inexistente encerra com codigo != 0 (rc=1)
+  ok     arquivo inexistente imprime mensagem
+  ok     argumentos demais encerra com codigo != 0 (rc=1)
+  ok     argumentos demais imprime mensagem
+
+=== COMANDOS DA ESPECIFICACAO ===
+  ok     run executa e entrega TODOS os argumentos (pega off-by-one no argv)
+  ok     run passa a opcao -l (linhas com bits de permissao)
+  ok     run espera o filho terminar (levou 1013ms, esperado >=900)
+  ok     exec que falha imprime mensagem de erro
+  ok     exec que falha NAO cria um segundo processflow (msg 1x, esperado 1)
+  ok     exec que falha NAO encerra o processflow (comando seguinte roda)
+  ok     'run' de tarefa inexistente imprime erro
+  ok     comando desconhecido imprime erro
+
+=== ROBUSTEZ ===
+  ok     linha > 299 chars nao vira dois comandos (prompt apareceu 2x, esperado 2)
+
+=== FASE 4: SEQUENCIAL X PARALELO ===
+  ok     sequencial espera cada tarefa (3+1+2 = ~6s, medido 6018ms)
+  ok     paralelo roda as tres juntas (max(3,1,2) = ~3s, medido 3013ms)
+  ok     paralelo e mais rapido que sequencial (3013ms < 6018ms)
+  ok     avisa que a tarefa inexistente nao existe
+  ok     pula a inexistente e roda as outras duas (~2s, medido 2016ms)
+  ok     'run sequential' sem nenhum nome imprime erro
+  ok     'run sequential' com UM nome so imprime erro (enunciado: mais de uma)
+  ok     'run parallel' sem nenhum nome imprime erro
+  ok     lista toda inexistente nao derruba o processflow
+
+=== CODIGOS DE SAIDA (Fase 10) ===
+  ok     reporta codigo de saida diferente de zero
+  ok     NAO reporta nada quando o codigo e zero (sem ruido)
+  ok     mensagem de status sai no stderr, nao no stdout
+  ok     reporta o codigo exato do programa (timeout -> 124)
+  ok     sequencial reporta so a tarefa que falhou (1 linha(s), esperado 1)
+  ok     paralelo reporta so a tarefa que falhou (1 linha(s), esperado 1)
+
+=== FASE 5: REDIRECIONAMENTO ===
+  ok     ACEITACAO F5 (1/2): output criou o arquivo
+  ok     ACEITACAO F5 (1/2): conteudo ordenado bate com o esperado
+  ok     input alimentou mesmo o stdin do filho (arquivo nao vazio)
+  ok     a saida da tarefa foi pro arquivo, nao pro stdout do processflow
+  ok     output trunca a cada execucao (1 linha(s), esperado 1)
+  ok     ACEITACAO F5 (2/2): dois 'append' somam, nao truncam (2 linha(s), esperado 2)
+  ok     ACEITACAO F5 (2/2): a primeira execucao sobreviveu a segunda
+  ok     append preserva o que ja estava no arquivo
+  ok     'output' sozinho nao executa a tarefa nem cria o arquivo
+  ok     redirecionamento vale tambem no 'run sequential'
+  ok     redirecionamento vale tambem no 'run parallel'
+  ok     tarefa sem redirecionamento continua escrevendo no stdout
+  ok     tarefa com redirecionamento nao escreve no stdout do processflow
+  ok     o texto da tarefa redirecionada foi parar no arquivo
+
+=== FASE 5: ERROS DE REDIRECIONAMENTO (Fase 10) ===
+  ok     entrada inexistente NAO encerra o processflow (rc=0)
+  ok     entrada inexistente: o comando seguinte roda
+  ok     entrada inexistente imprime mensagem de erro
+  ok     erro de entrada sai no stderr, nao no stdout
+  ok     saida impossivel NAO encerra o processflow (rc=0)
+  ok     saida impossivel: o comando seguinte roda
+  ok     saida impossivel imprime mensagem de erro
+  ok     'input' em tarefa inexistente: erro que nao encerra
+  ok     'output' em tarefa inexistente: erro que nao encerra
+  ok     'append' em tarefa inexistente: erro que nao encerra
+  ok     'input' com argumentos de menos imprime erro
+  ok     'output' com argumentos de menos imprime erro
+  ok     'append' com argumentos de menos imprime erro
+  ok     'input' com argumentos de mais imprime erro
+  ok     a mensagem de erro do 'output' nao fala em 'entrada'
+
+=== FASE 6: PIPE ===
+  ok     ACEITACAO F6 (1/2): o pipeline TERMINA sozinho (rc=0, 124=pendurou)
+  ok     ACEITACAO F6 (2/2): 'run pipe listar ordenar contar' conta 10
+  ok     o pipeline encadeia de verdade (1o nome ordenado = adriana)
+  ok     pipeline de 2 tarefas (1 canal) funciona
+  ok     200k linhas atravessam sem pendurar (rc=0) -- pega ponta nao fechada
+  ok     200k linhas: a contagem final esta certa
+  ok     300 pipelines na mesma sessao nao derrubam o processflow (rc=0)
+  ok     os 300 pipelines dao 10 (300/300) -- pega vazamento de fd no pai
+  ok     pipe com tarefa inexistente avisa qual faltou
+  ok     pipe com tarefa inexistente ABORTA (nao vira pipeline curto e plausivel)
+  ok     'run pipe' sem nenhum nome imprime erro
+  ok     'run pipe' com UM nome so imprime erro (pipeline precisa de 2+)
+  ok     pipe todo inexistente nao derruba a sessao
+  ok     o comando depois do pipe roda (o pai nao foi substituido pelo exec)
+  ok     o processflow nao se duplica no pipeline (1 eco(s), esperado 1)
+  ok     'output' na ultima tarefa do pipeline escreve no arquivo
+  ok     com 'output', o 10 NAO sai no stdout do processflow
+
+=== FASE 8: WORKDIR ===
+  ok     'workdir' e um comando reconhecido pelo despacho
+  ok     ACEITACAO F8: depois do workdir, 'run listar' lista o novo diretorio
+  ok     ACEITACAO F8: e NAO lista mais o diretorio antigo (sem 'Makefile')
+  ok     o .pf continua sendo lido e ecoado depois do workdir
+  ok     CONTROLE: sem workdir, lista o diretorio de lancamento
+  ok     workdir para diretorio inexistente escreve erro no stderr
+  ok     workdir para diretorio inexistente NAO encerra a sessao (rc=0)
+  ok     apos workdir que falha, o diretorio corrente continua o mesmo
+  ok     workdir apontando para arquivo da erro e nao encerra (rc=0)
+  ok     'workdir' sem argumento da erro de uso e nao encerra (rc=0)
+  ok     'workdir' com dois argumentos da erro de uso e nao encerra (rc=0)
+  ok     workdir aceita caminho relativo, resolvido contra o diretorio corrente
+  ok     dois 'workdir alvo' seguidos: o segundo falha (semantica de cd)
+  ok     output relativo resolve no 'run': o arquivo nasce no diretorio novo
+  ok     ...e NAO no diretorio em que o 'output' foi cadastrado
+  ok     programa em caminho relativo tambem resolve contra o diretorio novo
+
+----------------------------------------
+99 testes, 0 falha(s)
+
+[?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-24 16:29:32-03:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-24 16:30:24-03:00 [COMMAND="bash --norc --noprofile -i" TERM="xterm" TTY="/dev/pts/2" COLUMNS="91" LINES="19"]
+[?2004hbash-5.3$ make[Ke
+[?2004lgcc -std=gnu11 -Wall -Wextra -g -MMD -MP -c source/process_flow.c -o objects/process_flow.o
+gcc -std=gnu11 -Wall -Wextra -g -o processflow objects/executor.o objects/parser.o objects/process_flow.o objects/tasks.o
+[?2004hbash-5.3$ ./processflow
+[?2004lprocessflow> mkr dir naotem
+Erro: comando desconhecido: 'mkdir'.
+processflow> workdir naotem
+processflow: naotem: No such file or directory.
+processflow> [?2004hbash-5.3$ [?2004l
+exit
+
+Script done on 2026-08-24 16:31:44-03:00 [COMMAND_EXIT_CODE="0"]

@@ -500,6 +500,158 @@ check "'output' na ultima tarefa do pipeline escreve no arquivo" $?
 ! echo "$out" | grep -qx "10"
 check "com 'output', o 10 NAO sai no stdout do processflow" $?
 
+
+echo
+echo "=== FASE 8: WORKDIR ==="
+# Decisao registrada no PLANO (opcao 'a'): 'workdir' muda o diretorio do
+# PROPRIO processflow, como o 'cd' de um shell. Estes testes existem para
+# fixar as CONSEQUENCIAS dessa escolha, nao so o caso feliz -- em especial
+# que caminho relativo de redirecionamento e de programa resolvem no 'run',
+# contra o diretorio daquele momento, e nao no cadastro.
+
+# Trava de sanidade: enquanto 'workdir' nao existir no despacho, o binario
+# responde "comando desconhecido" -- que tambem escreve no stderr e tambem nao
+# encerra. Sem esta trava, os testes de ERRO abaixo passariam por acidente.
+err=$(printf "workdir /tmp\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null)
+! echo "$err" | grep -qi "desconhecido"
+check "'workdir' e um comando reconhecido pelo despacho" $?
+
+F8=/tmp/pf_f8
+rm -rf $F8; mkdir -p $F8/alvo
+: > $F8/alvo/sentinela-f8.txt          # marca so existente no diretorio alvo
+cp /bin/echo $F8/alvo/prog             # programa alcancavel por caminho relativo
+: > $F8/nao-sou-dir.txt                # arquivo, para o caso ENOTDIR
+
+# --- ACEITACAO DA FASE: 'workdir' seguido de 'run listar' lista o novo diretorio.
+# O .pf continua sendo lido depois do workdir: o fopen do arquivo ja aconteceu
+# no main, entao mudar o diretorio debaixo dele nao interrompe a leitura --
+# e por isso que as linhas seguintes a 'workdir' ainda executam.
+cat > $F8/aceita.pf << EOF
+task listar /bin/ls
+workdir $F8/alvo
+run listar
+exit
+EOF
+out=$(timeout 10 $BIN $F8/aceita.pf 2>/dev/null)
+
+echo "$out" | grep -qx "sentinela-f8.txt"
+check "ACEITACAO F8: depois do workdir, 'run listar' lista o novo diretorio" $?
+
+! echo "$out" | grep -qx "Makefile"
+check "ACEITACAO F8: e NAO lista mais o diretorio antigo (sem 'Makefile')" $?
+
+# --- linha depois do 'workdir' ainda e executada (o .pf sobrevive ao chdir)
+echo "$out" | grep -qx "run listar"
+check "o .pf continua sendo lido e ecoado depois do workdir" $?
+
+# --- controle: sem 'workdir', lista o diretorio de onde o processflow foi lancado.
+# Sem este par o teste acima provaria pouco: 'sentinela' poderia estar aparecendo
+# por qualquer motivo.
+cat > $F8/semwd.pf << 'EOF'
+task listar /bin/ls
+run listar
+exit
+EOF
+out=$(timeout 10 $BIN $F8/semwd.pf 2>/dev/null)
+echo "$out" | grep -qx "Makefile"
+check "CONTROLE: sem workdir, lista o diretorio de lancamento" $?
+
+# --- diretorio inexistente: erro que NAO encerra a sessao
+cat > $F8/inexistente.pf << EOF
+workdir /nao/existe/de/jeito/nenhum/f8
+task listar /bin/ls
+run listar
+exit
+EOF
+err=$(timeout 10 $BIN $F8/inexistente.pf 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && ! echo "$err" | grep -qi "desconhecido"
+check "workdir para diretorio inexistente escreve erro no stderr" $?
+[ $rc -eq 0 ]
+check "workdir para diretorio inexistente NAO encerra a sessao (rc=$rc)" $?
+
+# --- ...e o diretorio corrente fica INTACTO depois da falha.
+# Esta e a propriedade que torna o tratamento de erro trivial: o chdir ou muda
+# tudo ou nao muda nada, entao nao existe estado parcial para desfazer.
+out=$(timeout 10 $BIN $F8/inexistente.pf 2>/dev/null)
+echo "$out" | grep -qx "Makefile"
+check "apos workdir que falha, o diretorio corrente continua o mesmo" $?
+
+# --- workdir apontando para um ARQUIVO (ENOTDIR), nao para um diretorio
+cat > $F8/naodir.pf << EOF
+workdir $F8/nao-sou-dir.txt
+task listar /bin/ls
+run listar
+exit
+EOF
+err=$(timeout 10 $BIN $F8/naodir.pf 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && [ $rc -eq 0 ] && ! echo "$err" | grep -qi "desconhecido"
+check "workdir apontando para arquivo da erro e nao encerra (rc=$rc)" $?
+
+# --- aridade errada: nem 'workdir' sozinho nem com dois argumentos
+err=$(printf "workdir\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && [ $rc -eq 0 ] && ! echo "$err" | grep -qi "desconhecido"
+check "'workdir' sem argumento da erro de uso e nao encerra (rc=$rc)" $?
+
+err=$(printf "workdir /tmp /var\nexit\n" | timeout 5 $BIN 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && [ $rc -eq 0 ] && ! echo "$err" | grep -qi "desconhecido"
+check "'workdir' com dois argumentos da erro de uso e nao encerra (rc=$rc)" $?
+
+# --- CAMINHO RELATIVO E COMPOSICAO: e o comportamento do 'cd'.
+# Dois 'workdir alvo' seguidos NAO sao idempotentes -- o segundo resolve a
+# partir do primeiro e falha. Fixar isso aqui evita cacar um bug que nao existe.
+cat > $F8/relativo.pf << EOF
+task listar /bin/ls
+workdir $F8
+workdir alvo
+run listar
+exit
+EOF
+out=$(timeout 10 $BIN $F8/relativo.pf 2>/dev/null)
+echo "$out" | grep -qx "sentinela-f8.txt"
+check "workdir aceita caminho relativo, resolvido contra o diretorio corrente" $?
+
+cat > $F8/relativo2.pf << EOF
+workdir $F8
+workdir alvo
+workdir alvo
+exit
+EOF
+err=$(timeout 10 $BIN $F8/relativo2.pf 2>&1 >/dev/null); rc=$?
+[ -n "$err" ] && [ $rc -eq 0 ] && ! echo "$err" | grep -qi "desconhecido"
+check "dois 'workdir alvo' seguidos: o segundo falha (semantica de cd)" $?
+
+# --- A CONSEQUENCIA CENTRAL DA OPCAO (a): o redirecionamento com caminho
+# relativo resolve na hora do 'run', contra o diretorio corrente daquele
+# momento -- e NAO na hora do 'output'. Se um dia a decisao mudar para a
+# opcao (b), este e o teste que fica vermelho primeiro.
+rm -f pf_f8_rel.txt $F8/alvo/pf_f8_rel.txt
+cat > $F8/tarde.pf << EOF
+task escrever /bin/echo conteudo-f8
+output escrever pf_f8_rel.txt
+workdir $F8/alvo
+run escrever
+exit
+EOF
+timeout 10 $BIN $F8/tarde.pf >/dev/null 2>&1
+
+[ -f $F8/alvo/pf_f8_rel.txt ] && grep -qx "conteudo-f8" $F8/alvo/pf_f8_rel.txt
+check "output relativo resolve no 'run': o arquivo nasce no diretorio novo" $?
+
+[ ! -f pf_f8_rel.txt ]
+check "...e NAO no diretorio em que o 'output' foi cadastrado" $?
+rm -f pf_f8_rel.txt
+
+# --- mesma regra para o PROGRAMA da tarefa: './prog' resolve no exec,
+# depois do chdir. Com programa em caminho absoluto isso nunca aparece.
+cat > $F8/progrel.pf << EOF
+workdir $F8/alvo
+task p ./prog oi-de-caminho-relativo
+run p
+exit
+EOF
+out=$(timeout 10 $BIN $F8/progrel.pf 2>/dev/null)
+echo "$out" | grep -qx "oi-de-caminho-relativo"
+check "programa em caminho relativo tambem resolve contra o diretorio novo" $?
 echo
 echo "----------------------------------------"
 echo "$((ok+falhou)) testes, $falhou falha(s)"

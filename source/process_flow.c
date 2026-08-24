@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <unistd.h>
 #include "parser.h"
 #include "tasks.h"
 #include "executor.h"
@@ -84,6 +86,17 @@ static void tratar_append(char **palavras, int n) {
     StatusTarefa status = definir_saida(palavras[1], palavras[2], 1);
     if (status != TASK_OK) {
         fprintf(stderr, "Erro: append nao definido: %s.\n", mensagem_status(status));
+    }
+}
+
+static void tratar_workdir(char **palavras, int n) {
+    if (n != 2) {
+        fprintf(stderr, "Erro: uso: workdir <diretório>\n");
+        return;
+    }
+    if (chdir(palavras[1]) != 0) {
+        fprintf(stderr, "processflow: %s: %s.\n", palavras[1], strerror(errno));
+        return;
     }
 }
 
@@ -190,6 +203,7 @@ static const Comando comandos[] = {
     { "input", tratar_input },
     { "output", tratar_output },
     { "append", tratar_append },
+    { "workdir", tratar_workdir },
     { "run",  tratar_run  },
     { "exit", tratar_exit },
 };
