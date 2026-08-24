@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "tasks.h"
 
-#define MAX_JOBS 32
+#define MAX_JOBS 64
 
 typedef enum {
     JOB_RODANDO,

@@ -1,7 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
-#define MAX_TASKS     32
+#define MAX_TASKS     64
 #define MAX_N_LEN  64
 #define MAX_P_LEN  256
 #define MAX_ARGS      16
