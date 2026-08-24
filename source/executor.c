@@ -1,8 +1,10 @@
 #include "tasks.h"
+#include "executor.h"
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -20,7 +22,7 @@ static int redirecionar(char *arquivo, int flags, int alvo) {
     return 0;
 }
 
-pid_t create_process(Tarefa *tarefa) {
+pid_t create_process_pipe(Tarefa *tarefa, int fd_in, int fd_out, int (*pipes)[2], int n_pipes) {
     pid_t pid;
     char *args[MAX_ARGS + 2];
     args[0] = tarefa->programa;
@@ -32,9 +34,16 @@ pid_t create_process(Tarefa *tarefa) {
     pid = fork();
     if (pid < 0) {
         perror("fork");
+        return -1;
     }
     
     if (pid == 0) {
+        if (fd_in  >= 0) dup2(fd_in,  STDIN_FILENO);
+        if (fd_out >= 0) dup2(fd_out, STDOUT_FILENO);
+        for (int i = 0; i < n_pipes; i++) {
+            close(pipes[i][0]);
+            close(pipes[i][1]);
+        }
         if (tarefa->entrada[0] != '\0') {
             if (redirecionar(tarefa->entrada, O_RDONLY, STDIN_FILENO) < 0) {
                 fprintf(stderr, "processflow: %s: %s\n", tarefa->entrada, strerror(errno));
@@ -56,6 +65,10 @@ pid_t create_process(Tarefa *tarefa) {
         exit(EXIT_FAILURE);
     }
     return pid;
+}
+
+pid_t create_process(Tarefa *tarefa) {
+    return create_process_pipe(tarefa, FD_HERDADO, FD_HERDADO, NULL, 0); //FD_HERDADO indica que não há ponta de pipe para ligar.
 }
 
 pid_t wait_process(pid_t pid, int *out_status) {
@@ -113,3 +126,55 @@ void executar_paralelo(Tarefa *tarefas[], int total) {
     }
 }
 
+void executar_pipeline(Tarefa *tarefas[], int total)
+{
+    if (total < 2) {
+        fprintf(stderr, "Erro: total de tarefas deve ser pelo menos 2\n");
+        return;
+    }
+
+    int pipes[total - 1][2];
+    int criados = 0;
+
+    for (int i = 0; i < total - 1; i++) {
+        if (pipe(pipes[i]) < 0) {
+            perror("pipe");
+            for (int j = 0; j < criados; j++) {
+                close(pipes[j][0]);
+                close(pipes[j][1]);
+            }
+            return;
+        }
+        criados++;
+    }
+
+    pid_t pids[total];
+    int lancados = 0;
+
+    for (int i = 0; i < total; i++) {
+        int fd_in  = FD_HERDADO;
+        int fd_out = FD_HERDADO;
+
+        if (i > 0)
+            fd_in = pipes[i - 1][0];
+
+        if (i < total - 1)
+            fd_out = pipes[i][1];
+
+        pids[i] = create_process_pipe(tarefas[i], fd_in, fd_out, pipes, total - 1);
+        if (pids[i] == -1)
+            break;
+        lancados++;
+    }
+    for (int i = 0; i < total - 1; i++) {
+        close(pipes[i][0]);
+        close(pipes[i][1]);
+    }
+    
+    int status;
+    for (int i = 0; i < lancados; i++) {
+        if (wait_process(pids[i], &status) < 0)
+            continue;
+        reportar_status(tarefas[i], status);
+    }
+}

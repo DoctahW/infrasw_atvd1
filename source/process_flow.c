@@ -100,6 +100,14 @@ static int resolver_tarefas(char **palavras, int n, Tarefa *destino[]) {
     return qtd;
 }
 
+static int resolver_tarefas_estrito(char **palavras, int n, Tarefa *destino[]) {
+    int qtd = resolver_tarefas(palavras, n, destino);
+    if (qtd == n) {
+        return qtd;
+    }
+    return 0;
+}
+
 static void tratar_run(char **palavras, int n) {
     if (n < 2) {
         fprintf(stderr, "Erro: uso: run <tarefa> | run sequential | parallel | pipe <tarefas...>\n");
@@ -138,7 +146,19 @@ static void tratar_run(char **palavras, int n) {
         return;
     }
     if (strcmp(palavras[1], "pipe") == 0) {
-        fprintf(stderr, "Erro: 'run pipe' ainda nao implementado (Fase 6).\n");
+        if (n < 4) {
+            fprintf(stderr, "Erro: uso: run pipe <tarefa1> <tarefa2> [tarefa3...]\n");
+            return;
+        }
+    
+        Tarefa *tarefas[n - 2];
+        int qtd = resolver_tarefas_estrito(palavras + 2, n - 2, tarefas);
+        if (qtd == 0) {
+            fprintf(stderr, "Erro: Uma das tarefas não existe.\n");
+            return;
+        }
+    
+        executar_pipeline(tarefas, qtd);
         return;
     }
 
